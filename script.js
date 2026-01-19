@@ -1,208 +1,180 @@
-// Event Data
-const events = [
-    // --- DEC 2025 ---
-    {
-        id: 1,
-        title: "Event: Well Armed",
-        type: "Event",
-        start: new Date("2025-12-11T10:00:00"),
-        end: new Date("2025-12-16T20:00:00"),
-        description: "Global challenges and the debut of Clobbopus and Grapploct! Boosted shiny odds for Dynamax Hitmonchan & Hitmonlee.",
-    },
-    {
-        id: 2,
-        title: "Season of Precious Paths",
-        type: "Season",
-        start: new Date("2025-12-02T10:00:00"),
-        end: new Date("2026-03-03T10:00:00"),
-        description: "The season of connection. Bonuses for trading and gifting continue for three months.",
-    },
-    {
-        id: 3,
-        title: "Max Battle: Gigantamax Snorlax",
-        type: "Max Battle",
-        start: new Date("2025-12-14T00:00:00"),
-        end: new Date("2025-12-14T23:59:59"),
-        description: "Gigantamax Snorlax appears in Max Battles.",
-    },
-    {
-        id: 4,
-        title: "Raid Hour: Reshiram",
-        type: "Raid Hour",
-        start: new Date("2025-12-17T18:00:00"),
-        end: new Date("2025-12-17T19:00:00"),
-        description: "Reshiram raids appearing frequently in all gyms.",
-    },
-    {
-        id: 5,
-        title: "Winter Holiday Part 1",
-        type: "Event",
-        start: new Date("2025-12-18T10:00:00"),
-        end: new Date("2025-12-24T10:00:00"),
-        description: "Costumed Charjabug and Sudowoodo debut! Ice-types everywhere.",
-    },
-    {
-        id: 6,
-        title: "Celestial Research Day",
-        type: "Research Day",
-        start: new Date("2025-12-20T14:00:00"),
-        end: new Date("2025-12-20T17:00:00"),
-        description: "Feature on Lunatone and Solrock with boosted Shiny odds.",
-    },
-    {
-        id: 7,
-        title: "Winter Holiday Part 2",
-        type: "Event",
-        start: new Date("2025-12-24T10:00:00"),
-        end: new Date("2025-12-29T20:00:00"),
-        description: "Debuts for Rolycoly, Carkol, and Coalossal. Increased Shiny Stantler odds.",
-    },
-    {
-        id: 8,
-        title: "New Year's Event 2026",
-        type: "Event",
-        start: new Date("2025-12-31T20:00:00"),
-        end: new Date("2026-01-04T20:00:00"),
-        description: "Celebrate arrival of 2026! Fireworks in the sky and festive costumed Pokémon.",
-    },
+// Event Data State
+let events = [];
+let filteredEvents = [];
 
-    // --- JAN 2026 ---
-    {
-        id: 9,
-        title: "Community Day Classic: Piplup",
-        type: "Community Day",
-        start: new Date("2026-01-04T14:00:00"),
-        end: new Date("2026-01-04T17:00:00"),
-        description: "Piplup is back! Evolve Prinplup to get an Empoleon with Hydro Cannon. 1/4 Hatch Distance bonus.",
-    },
-    {
-        id: 10,
-        title: "Raid Day: Unknown",
-        type: "Raid Day",
-        start: new Date("2026-01-10T14:00:00"),
-        end: new Date("2026-01-10T17:00:00"),
-        description: "A special Raid Day event. Featured Pokémon to be announced.",
-    },
-    {
-        id: 11,
-        title: "Community Day: Grookey",
-        type: "Community Day",
-        start: new Date("2026-01-18T14:00:00"),
-        end: new Date("2026-01-18T17:00:00"),
-        description: "Grookey shines for the first time! Evolve to get Frenzy Plant. 3x Catch Stardust.",
-    },
-    {
-        id: 12,
-        title: "Shadow Raid Day",
-        type: "Raid Day",
-        start: new Date("2026-01-24T06:00:00"),
-        end: new Date("2026-01-24T22:00:00"),
-        description: "A takeover of Shadow Raids. Team GO Rocket is up to something...",
-    },
+const API_URL = "https://raw.githubusercontent.com/bigfoott/ScrapedDuck/data/events.min.json";
 
-    // --- FEB 2026 ---
-    {
-        id: 13,
-        title: "Max Battle Weekend",
-        type: "Max Battle",
-        start: new Date("2026-01-31T06:00:00"),
-        end: new Date("2026-02-01T22:00:00"),
-        description: "A weekend dedicated to Dynamax battles.",
-    },
-    {
-        id: 14,
-        title: "Community Day: Feb",
-        type: "Community Day",
-        start: new Date("2026-02-01T14:00:00"),
-        end: new Date("2026-02-01T17:00:00"),
-        description: "February's Community Day. Featured Pokémon coming soon.",
-    },
-    {
-        id: 15,
-        title: "GO Tour: Kalos (Global)",
-        type: "Major Event",
-        start: new Date("2026-02-28T10:00:00"),
-        end: new Date("2026-03-01T18:00:00"),
-        description: "The biggest event of the year! Explore the Kalos region, catch shiny legendaries, and Mega Evolve everything.",
-    }
-];
-
-// Event Type Glossary
+// Event Type Definitions (English)
 const eventDefinitions = {
-    "Community Day": {
-        desc: "A 3-hour monthly event featuring a specific Pokémon with high shiny rates.",
-        bonus: "Bonuses often include 3x XP, Stardust, or 1/4 Egg Distance. Evolving gives a special move."
+    "community-day": {
+        name: "Community Day",
+        desc: "A monthly event featuring a specific Pokémon with high shiny rates and an exclusive move.",
+        bonus: "Bonuses often include 3x XP, Stardust, or 1/4 Hatch Distance."
     },
-    "Raid Hour": {
-        desc: "A 1-hour event every Wednesday (6-7 PM) where 5-star Raids appear on all Gyms.",
-        bonus: "Great for shiny hunting legendaries and getting Rare Candy."
+    "raid-hour": {
+        name: "Raid Hour",
+        desc: "Every Wednesday evening (6:00 PM - 7:00 PM), 5-star Raids appear on most Gyms.",
+        bonus: "Perfect for shiny hunting legendaries with local groups."
     },
-    "Spotlight Hour": {
-        desc: "A 1-hour event every Tuesday (6-7 PM) featuring one Pokémon spawning everywhere.",
-        bonus: "Includes a special bonus like 2x Catch Candy, Transfer Candy, or XP."
+    "pokemon-spotlight-hour": {
+        name: "Spotlight Hour",
+        desc: "Every Tuesday evening (6:00 PM - 7:00 PM), one Pokémon appears everywhere.",
+        bonus: "Includes a special bonus like 2x Catch Candy or Transfer Candy."
     },
-    "Research Day": {
-        desc: "An event focused on completing Field Research tasks from PokéStops.",
-        bonus: "Featured Pokémon from tasks have boosted shiny rates. Often usually lasts 3 hours."
+    "pokestop-showcase": {
+        name: "PokéStop Showcase",
+        desc: "Enter your biggest or smallest Pokémon at PokéStops to win rewards.",
+        bonus: "Usually focused on Pokémon featured in the current event."
     },
-    "Max Battle": {
-        desc: "Events focused on Dynamax and Gigantamax battles at Power Spots.",
-        bonus: "Max Particles are easier to earn and specific Max Pokémon appear."
+    "raid-battles": {
+        name: "Raid Battles",
+        desc: "Special Pokémon appearing temporarily in Gyms.",
+        bonus: "Earn rare Pokémon and items like Rare Candy or TMs."
     },
-    "Event": {
-        desc: "A standard in-game event usually lasting a few days to a week.",
-        bonus: "Themed spawns, special eggs, raids, and timed research."
+    "event": {
+        name: "Event",
+        desc: "A standard in-game event with varying themes and spawns.",
+        bonus: "Themed spawns, eggs, and specific Field Research tasks."
     },
-    "Season": {
+    "season": {
+        name: "Season",
         desc: "A 3-month long period with specific spawns and consistent bonuses.",
-        bonus: "Affects GBL rewards, egg pools, and seasonal spawns."
+        bonus: "Affects spawns, eggs, and GBL rewards."
     },
-    "Raid Day": {
-        desc: "A 3-hour event focused on Raids. You usually get up to 5 free Raid Passes.",
-        bonus: "Shiny odds are significantly boosted (usually 1/10)."
+    "max-mondays": {
+        name: "Max Monday",
+        desc: "Every Monday evening focusing on Dynamax Pokémon at Power Spots.",
+        bonus: "Earn extra Max Particles and catch powerful Pokémon."
     },
-    "Major Event": {
-        desc: "Large scale events like GO Fest or GO Tour.",
-        bonus: "Ticketed or free global gameplay with massive rewards and rare spawns."
+    "max-battles": {
+        name: "Max Battles",
+        desc: "Events centered around Dynamax Pokémon and Power Spots.",
+        bonus: "Increased Max Particles and special Dynamax encounters."
+    },
+    "go-pass": {
+        name: "GO Pass",
+        desc: "Ticketed monthly bonuses and Timed Research.",
+        bonus: "Daily content and extra rewards for ticket holders."
+    },
+    "go-battle-league": {
+        name: "GO Battle League",
+        desc: "Competitive PvP updates, cups, and battle weekends.",
+        bonus: "4x Stardust from win rewards and increased battle sets."
+    },
+    "raid-day": {
+        name: "Raid Day",
+        desc: "A focused event usually lasting 3 hours with raid-exclusive Pokémon.",
+        bonus: "Receive up to 5 additional free Raid Passes."
+    },
+    "team-go-rocket": {
+        name: "Team GO Rocket",
+        desc: "Increased Team GO Rocket activity and innovation.",
+        bonus: "Remove Frustration from Shadow Pokémon with TMs."
+    },
+    "pokemon-go-tour": {
+        name: "Pokémon GO Tour",
+        desc: "A major celebration featuring Pokémon from a specific region.",
+        bonus: "Shiny debuts, special research, and regional exclusives."
+    },
+    "research": {
+        name: "Special Research",
+        desc: "New Special or Timed Research lines released.",
+        bonus: "Compelling stories and unique encounter rewards."
+    },
+    "default": {
+        name: "Event",
+        desc: "Information about this Pokémon GO event.",
+        bonus: "Stay tuned for more in-game details!"
     }
 };
 
-// Make functions global to ensure inline onclick works
-window.renderEvents = function () {
-    console.log("Rendering events...");
+async function loadEvents() {
+    try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+
+        // Transform data to include Date objects
+        events = data.map(e => ({
+            ...e,
+            eventType: e.eventType.split(' ')[0],
+            start: new Date(e.start),
+            end: new Date(e.end)
+        }));
+
+        filteredEvents = [...events];
+        await window.renderEvents();
+    } catch (error) {
+        console.error("Error loading events:", error);
+        document.getElementById('active-events-container').innerHTML = '<p class="subtitle">Oops! Could not load events. Please try again later.</p>';
+    }
+}
+
+// Search and Filter Logic
+async function applyFilters() {
+    const searchTerm = document.getElementById('event-search').value.toLowerCase();
+    const filterType = document.getElementById('event-filter').value;
+
+    filteredEvents = events.filter(event => {
+        const matchesSearch = event.name.toLowerCase().includes(searchTerm) ||
+            event.eventType.toLowerCase().includes(searchTerm);
+        const matchesType = filterType === 'all' || event.eventType === filterType;
+
+        return matchesSearch && matchesType;
+    });
+
+    await window.renderEvents();
+}
+
+window.renderEvents = async function () {
     const activeEventsContainer = document.getElementById('active-events-container');
     const upcomingEventsContainer = document.getElementById('upcoming-events-container');
     const now = new Date();
 
     if (!activeEventsContainer || !upcomingEventsContainer) return;
 
-    // Sort events by start time
-    const sortedEvents = events.sort((a, b) => a.start - b.start);
+    // Get saved events from Supabase session
+    let savedEvents = [];
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    if (session) {
+        const storageKey = `pogo_saved_${session.user.id}`;
+        savedEvents = JSON.parse(localStorage.getItem(storageKey)) || [];
+    }
 
-    // Filter logic
-    const activeEvents = sortedEvents.filter(e => e.start <= now && e.end > now);
-    const upcomingEvents = sortedEvents.filter(e => e.start > now);
+    const sortedEvents = filteredEvents.sort((a, b) => a.start - b.start);
+    const activeEventsTotal = sortedEvents.filter(e => e.start <= now && e.end > now);
+    const upcomingEventsTotal = sortedEvents.filter(e => e.start > now);
 
     // Render Active
     activeEventsContainer.innerHTML = '';
-    if (activeEvents.length === 0) {
-        activeEventsContainer.innerHTML = '<p class="subtitle" style="padding: 1rem;">No active major events right now. Check back soon!</p>';
+    if (activeEventsTotal.length === 0) {
+        activeEventsContainer.innerHTML = '<p class="subtitle" style="padding: 1rem;">No matching active events right now.</p>';
     } else {
-        activeEvents.forEach(event => {
+        activeEventsTotal.forEach(event => {
+            const def = eventDefinitions[event.eventType] || eventDefinitions['default'];
             const card = document.createElement('div');
-            card.className = 'event-card';
+            card.className = `event-card type-${event.eventType}`;
+
+            // Check if saved
+            const isSaved = savedEvents.includes(event.eventID);
+            const saveBtnIcon = isSaved ? 'ph-fill ph-star' : 'ph-bold ph-star';
+            const saveBtnText = isSaved ? 'Saved' : 'Save';
+            const saveBtnClass = isSaved ? 'action-btn saved' : 'action-btn secondary';
 
             card.innerHTML = `
-                <div style="display: flex; justify-content: space-between; align-items: start;">
-                    <span class="event-type clickable-badge" onclick="window.openTypeModal('${event.type}')" title="What is a ${event.type}?">${event.type} <i class="ph-bold ph-question"></i></span>
+                <img src="${event.image}" class="event-card-image" alt="${event.name}" onerror="this.src='https://cdn.leekduck.com/assets/img/events/events-default-img.jpg'">
+                <div class="event-card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <span class="event-type clickable-badge" onclick="window.openTypeModal('${event.eventType}')">${def.name} <i class="ph-bold ph-question"></i></span>
+                        <button class="icon-btn" onclick="window.toggleSaveEvent('${event.eventID}')" title="${saveBtnText}"><i class="${saveBtnIcon}" style="${isSaved ? 'color: var(--accent-primary);' : ''}"></i></button>
+                    </div>
+                    <h4 class="event-title">${event.name}</h4>
+                    <div class="event-time">
+                        <i class="ph-bold ph-clock"></i>
+                        <span>Ends in ${window.getTimeRemaining(now, event.end)}</span>
+                    </div>
+                    <div class="countdown-badge">Active Now</div>
+                    <button class="action-btn" onclick="window.openModal('${event.eventID}')">View Details</button>
                 </div>
-                <h4 class="event-title">${event.title}</h4>
-                <div class="event-time">
-                    <i class="ph-bold ph-clock"></i>
-                    <span>Ends in ${window.getTimeRemaining(now, event.end)}</span>
-                </div>
-                <div class="countdown-badge">Active Now</div>
-                <button class="action-btn" onclick="window.openModal(${event.id})">View Details</button>
             `;
             activeEventsContainer.appendChild(card);
         });
@@ -210,16 +182,21 @@ window.renderEvents = function () {
 
     // Render Upcoming
     upcomingEventsContainer.innerHTML = '';
-    if (upcomingEvents.length === 0) {
-        upcomingEventsContainer.innerHTML = '<p class="subtitle">No upcoming events found.</p>';
+    if (upcomingEventsTotal.length === 0) {
+        upcomingEventsContainer.innerHTML = '<p class="subtitle">No matching upcoming events found.</p>';
     } else {
-        upcomingEvents.forEach(event => {
+        upcomingEventsTotal.forEach(event => {
+            const def = eventDefinitions[event.eventType] || eventDefinitions['default'];
             const item = document.createElement('div');
             item.className = 'list-item';
 
-            const month = event.start.toLocaleString('default', { month: 'short' });
+            const month = event.start.toLocaleString('en-US', { month: 'short' });
             const day = event.start.getDate();
-            const time = event.start.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' });
+            const time = event.start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+            // Check if saved
+            const isSaved = savedEvents.includes(event.eventID);
+            const saveBtnIcon = isSaved ? 'ph-fill ph-star' : 'ph-bold ph-star';
 
             item.innerHTML = `
                 <div class="list-date-box">
@@ -227,11 +204,14 @@ window.renderEvents = function () {
                     <span class="list-day">${day}</span>
                 </div>
                 <div class="list-content">
-                    <span class="event-type clickable-badge" onclick="window.openTypeModal('${event.type}')" title="Info about ${event.type}">${event.type} <i class="ph-bold ph-question"></i></span>
-                    <h4 style="font-size: 1.1rem; margin-bottom: 0.2rem; margin-top: 0.3rem;">${event.title}</h4>
-                    <span style="color: var(--text-secondary); font-size: 0.85rem;">Starts at ${time}</span>
+                    <div style="display:flex; justify-content: space-between;">
+                        <span class="event-type clickable-badge" onclick="window.openTypeModal('${event.eventType}')">${def.name} <i class="ph-bold ph-question"></i></span>
+                        <button class="icon-btn" onclick="window.toggleSaveEvent('${event.eventID}')"><i class="${saveBtnIcon}" style="${isSaved ? 'color: var(--accent-primary);' : ''}"></i></button>
+                    </div>
+                    <h4 style="font-size: 1.1rem; margin-bottom: 0.2rem; margin-top: 0.3rem;">${event.name}</h4>
+                    <span style="color: var(--text-secondary); font-size: 0.85rem;">Starts in ${window.getTimeRemaining(now, event.start)} (at ${time})</span>
                 </div>
-                <button class="list-action-btn" onclick="window.openModal(${event.id})" title="View Details"><i class="ph-bold ph-caret-right"></i></button>
+                <button class="list-action-btn" onclick="window.openModal('${event.eventID}')"><i class="ph-bold ph-caret-right"></i></button>
             `;
             upcomingEventsContainer.appendChild(item);
         });
@@ -251,52 +231,10 @@ window.getTimeRemaining = function (start, end) {
 }
 
 // Modal Logic
-window.openModal = function (id) {
-    console.log("Opening modal for id:", id);
-    const event = events.find(e => e.id === id);
+window.openModal = function (eventID) {
+    const event = events.find(e => e.eventID === eventID);
     if (!event) return;
 
-    const modal = document.getElementById('event-modal');
-    // Elements
-    const modalTitle = document.getElementById('modal-title');
-    const modalType = document.getElementById('modal-type');
-    const modalDate = document.getElementById('modal-date');
-    const modalTime = document.getElementById('modal-time');
-    const modalDesc = document.getElementById('modal-desc');
-    const modalExtra = document.getElementById('modal-extra');
-
-    modal.classList.remove('hidden');
-    void modal.offsetWidth; // force reflow
-    modal.classList.add('visible');
-
-    modalTitle.textContent = event.title;
-    modalType.textContent = event.type;
-    modalType.onclick = () => window.openTypeModal(event.type);
-    modalType.style.cursor = "pointer";
-
-    const startStr = event.start.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
-    const endStr = event.end.toLocaleDateString('default', { month: 'short', day: 'numeric', year: 'numeric' });
-    modalDate.textContent = (startStr === endStr) ? startStr : `${startStr} - ${endStr}`;
-
-    const startTime = event.start.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' });
-    const endTime = event.end.toLocaleTimeString('default', { hour: '2-digit', minute: '2-digit' });
-    modalTime.textContent = `${startTime} - ${endTime}`;
-
-    modalDesc.textContent = event.description;
-
-    // Add Glossary snippet
-    const def = eventDefinitions[event.type] || eventDefinitions['Event'];
-    modalExtra.innerHTML = `
-        <div style="margin-top: 1.5rem; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px;">
-            <strong style="color: var(--accent-primary); display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">ABOUT ${event.type.toUpperCase()}</strong>
-            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">${def.desc}</p>
-            <p style="font-size: 0.85rem; color: #fff;">💡 ${def.bonus}</p>
-        </div>
-    `;
-}
-
-window.openTypeModal = function (type) {
-    console.log("Opening type modal for:", type);
     const modal = document.getElementById('event-modal');
     const modalTitle = document.getElementById('modal-title');
     const modalType = document.getElementById('modal-type');
@@ -309,15 +247,64 @@ window.openTypeModal = function (type) {
     void modal.offsetWidth;
     modal.classList.add('visible');
 
-    const def = eventDefinitions[type] || eventDefinitions['Event'];
+    const def = eventDefinitions[event.eventType] || eventDefinitions['default'];
+    modalTitle.textContent = event.name;
+    modalType.textContent = def.name;
+    modalType.onclick = () => window.openTypeModal(event.eventType);
+    modalType.style.cursor = "pointer";
 
-    modalTitle.textContent = `What is a ${type}?`;
+    const startStr = event.start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    const endStr = event.end.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    modalDate.textContent = (startStr === endStr) ? startStr : `${startStr} - ${endStr}`;
+
+    const startTime = event.start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    const endTime = event.end.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+    modalTime.textContent = `${startTime} - ${endTime}`;
+
+    modalDesc.textContent = def.desc;
+
+    // Add Glossary & Calendar button
+    const calendarUrl = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.name)}&dates=${event.start.toISOString().replace(/-|:|\.\d\d\d/g, "")}/${event.end.toISOString().replace(/-|:|\.\d\d\d/g, "")}&details=${encodeURIComponent(def.desc + " Source: LeekDuck")}&location=Everywhere&sf=true&output=xml`;
+
+    modalExtra.innerHTML = `
+        <div style="margin-top: 1.5rem; background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px;">
+            <strong style="color: var(--accent-primary); display: block; margin-bottom: 0.5rem; font-size: 0.9rem;">ABOUT ${def.name.toUpperCase()}</strong>
+            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">${def.desc}</p>
+            <p style="font-size: 0.85rem; color: #fff;">💡 ${def.bonus}</p>
+        </div>
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <a href="${event.link}" target="_blank" class="action-btn" style="flex: 1; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="ph-bold ph-arrow-square-out"></i> View Full Details
+            </a>
+            <a href="${calendarUrl}" target="_blank" class="action-btn" style="flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="ph-bold ph-calendar-plus"></i> Add to Calendar
+            </a>
+        </div>
+    `;
+}
+
+window.openTypeModal = function (type) {
+    const modal = document.getElementById('event-modal');
+    const modalTitle = document.getElementById('modal-title');
+    const modalType = document.getElementById('modal-type');
+    const modalDate = document.getElementById('modal-date');
+    const modalTime = document.getElementById('modal-time');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalExtra = document.getElementById('modal-extra');
+
+    modal.classList.remove('hidden');
+    void modal.offsetWidth;
+    modal.classList.add('visible');
+
+    const def = eventDefinitions[type] || eventDefinitions['default'];
+
+    modalTitle.textContent = `What is a ${def.name}?`;
     modalType.textContent = "GUIDE";
     modalType.onclick = null;
     modalType.style.cursor = "default";
 
     modalDate.textContent = "General Info";
-    modalTime.textContent = "Always active"; // Placeholder
+    modalTime.textContent = "Always active";
 
     modalDesc.textContent = def.desc;
     modalExtra.innerHTML = `
@@ -327,10 +314,11 @@ window.openTypeModal = function (type) {
     `;
 }
 
-// Setup Event Listeners on Load
 document.addEventListener('DOMContentLoaded', () => {
     const closeModalBtn = document.getElementById('close-modal-btn');
     const modal = document.getElementById('event-modal');
+    const searchInput = document.getElementById('event-search');
+    const filterSelect = document.getElementById('event-filter');
 
     if (closeModalBtn) {
         closeModalBtn.onclick = () => {
@@ -352,7 +340,224 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Start
-    window.renderEvents();
+    if (searchInput) searchInput.addEventListener('input', applyFilters);
+    if (filterSelect) filterSelect.addEventListener('change', applyFilters);
+
+    loadEvents().then(() => {
+        // If on calendar page, render saved events after loading
+        if (window.location.pathname.includes('calendar.html')) {
+            window.renderSavedEvents();
+        }
+    });
     setInterval(window.renderEvents, 60000);
+});
+
+
+// --- AUTHENTICATION & CALENDAR LOGIC (SUPABASE) ---
+
+// Check login status on load
+window.checkAuthStatus = async function () {
+    const authSection = document.getElementById('auth-section');
+    if (!authSection) return;
+
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+
+    if (session) {
+        const userEmail = session.user.email;
+        const displayName = userEmail.split('@')[0]; // Use part before @ as display name
+        authSection.innerHTML = `
+            <button class="nav-btn" onclick="window.location.href='calendar.html'" style="margin-right: 10px;">My Calendar</button>
+            <button class="nav-btn primary" onclick="window.handleLogout()">Logout (${displayName})</button>
+        `;
+    } else {
+        authSection.innerHTML = `
+            <button class="nav-btn primary" onclick="window.openAuthModal()">Login / Sign Up</button>
+        `;
+    }
+}
+
+// Login Handler (Supabase)
+window.handleLogin = async function (e) {
+    if (e) e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+    }
+
+    console.log("Attempting login for:", email);
+
+    try {
+        const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        console.log("Login response:", { data, error });
+
+        if (error) {
+            console.error("Login error:", error);
+            alert("Login failed: " + error.message);
+        } else {
+            console.log("Login successful, reloading...");
+            window.location.reload();
+        }
+    } catch (err) {
+        console.error("Login exception:", err);
+        alert("Login error: " + err.message);
+    }
+}
+
+// Sign Up Handler (Supabase)
+window.handleSignUp = async function () {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value.trim();
+
+    if (!email || !password) {
+        alert("Please enter both email and password.");
+        return;
+    }
+
+    if (password.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+    }
+
+    const { data, error } = await window.supabaseClient.auth.signUp({
+        email: email,
+        password: password
+    });
+
+    if (error) {
+        alert("Sign up failed: " + error.message);
+    } else {
+        alert("Account created! You can now log in.");
+        window.location.reload();
+    }
+}
+
+// Logout Handler (Supabase)
+window.handleLogout = async function () {
+    await window.supabaseClient.auth.signOut();
+    localStorage.removeItem('pogo_user'); // Clean up old localStorage
+    window.location.href = 'index.html';
+}
+
+// Auth Modal
+window.openAuthModal = function () {
+    const modal = document.getElementById('auth-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        void modal.offsetWidth;
+        modal.classList.add('visible');
+    }
+}
+
+// Toggle Save Event (using Supabase session + localStorage for saved events)
+window.toggleSaveEvent = async function (eventID) {
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+
+    if (!session) {
+        window.openAuthModal();
+        return;
+    }
+
+    const userId = session.user.id;
+    const storageKey = `pogo_saved_${userId}`;
+    let savedEvents = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    const index = savedEvents.indexOf(eventID);
+    if (index === -1) {
+        savedEvents.push(eventID);
+    } else {
+        savedEvents.splice(index, 1);
+    }
+    localStorage.setItem(storageKey, JSON.stringify(savedEvents));
+
+    // Re-render to update button states
+    window.renderEvents();
+    if (window.location.pathname.includes('calendar.html')) {
+        window.renderSavedEvents();
+    }
+}
+
+// Render Saved Events (for calendar.html)
+window.renderSavedEvents = async function () {
+    const container = document.getElementById('saved-events-container');
+    if (!container) return; // Not on calendar page
+
+    const { data: { session } } = await window.supabaseClient.auth.getSession();
+    if (!session) return;
+
+    const userId = session.user.id;
+    const storageKey = `pogo_saved_${userId}`;
+    const savedEvents = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    const savedEventsData = events.filter(e => savedEvents.includes(e.eventID));
+
+    container.innerHTML = '';
+
+    if (savedEventsData.length === 0) {
+        container.innerHTML = '<p class="subtitle">No events saved yet. Go explore!</p>';
+        return;
+    }
+
+    savedEventsData.sort((a, b) => a.start - b.start).forEach(event => {
+        const def = eventDefinitions[event.eventType] || eventDefinitions['default'];
+        const card = document.createElement('div');
+        card.className = `event-card type-${event.eventType}`;
+
+        const month = event.start.toLocaleString('en-US', { month: 'short' });
+        const day = event.start.getDate();
+        const startTime = event.start.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+        card.innerHTML = `
+            <img src="${event.image}" class="event-card-image" alt="${event.name}" onerror="this.src='https://cdn.leekduck.com/assets/img/events/events-default-img.jpg'">
+            <div class="event-card-body">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <span class="event-type" style="margin-bottom:0;">${def.name}</span>
+                    <div class="list-date-box" style="transform: scale(0.8); transform-origin: top right; margin: 0;">
+                        <span class="list-month">${month}</span>
+                        <span class="list-day">${day}</span>
+                    </div>
+                </div>
+                <h4 class="event-title" style="margin-bottom: 0.5rem;">${event.name}</h4>
+                <div class="event-time" style="margin-bottom: 1rem;">
+                    <i class="ph-bold ph-clock"></i>
+                    <span>${startTime}</span>
+                </div>
+                <button class="action-btn remove-btn" onclick="window.toggleSaveEvent('${event.eventID}')">Remove from Calendar</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Initial Run
+document.addEventListener('DOMContentLoaded', () => {
+    window.checkAuthStatus();
+
+    const closeAuthBtn = document.getElementById('close-auth-btn');
+    const authModal = document.getElementById('auth-modal');
+    const authForm = document.getElementById('auth-form');
+
+    if (authForm) {
+        authForm.addEventListener('submit', window.handleLogin);
+    }
+
+    if (closeAuthBtn && authModal) {
+        closeAuthBtn.onclick = () => {
+            authModal.classList.remove('visible');
+            setTimeout(() => authModal.classList.add('hidden'), 300);
+        };
+
+        authModal.onclick = (e) => {
+            if (e.target === authModal) {
+                authModal.classList.remove('visible');
+                setTimeout(() => authModal.classList.add('hidden'), 300);
+            }
+        };
+    }
 });

@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <script src="config.js"></script>
 </head>
 
 <body>
@@ -24,15 +26,64 @@
             <h1>PoGo<span class="highlight">Hub</span></h1>
         </div>
         <nav>
-            <!-- Future nav items -->
+            <div id="auth-section">
+                <!-- Javascript will populate this -->
+                <button class="nav-btn primary" onclick="window.openAuthModal()">Login / Sign Up</button>
+            </div>
         </nav>
     </header>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px; text-align: center;">
+            <button class="close-modal" id="close-auth-btn"><i class="ph-bold ph-x"></i></button>
+            <h2 style="margin-bottom: 0.5rem;">Trainer Login</h2>
+            <p class="subtitle" style="margin-bottom: 1.5rem;">Sign in to sync your calendar</p>
+
+            <form id="auth-form" onsubmit="event.preventDefault(); window.handleLogin();">
+                <div class="search-box" style="margin-bottom: 1rem;">
+                    <i class="ph-bold ph-envelope"></i>
+                    <input type="email" id="email" placeholder="Email address" required style="width: 100%;">
+                </div>
+                <div class="search-box" style="margin-bottom: 1rem;">
+                    <i class="ph-bold ph-lock-key"></i>
+                    <input type="password" id="password" placeholder="Password (min. 6 characters)" required
+                        minlength="6" style="width: 100%;">
+                </div>
+                <button type="submit" class="action-btn" style="width: 100%; margin-bottom: 0.5rem;">Login</button>
+                <button type="button" class="action-btn"
+                    style="width: 100%; background: transparent; border: 1px solid var(--border-color);"
+                    onclick="window.handleSignUp()">Create Account</button>
+            </form>
+        </div>
+    </div>
 
     <main class="container">
         <!-- Hero Section -->
         <section class="hero">
             <h2>Don't miss the next <span class="text-gradient">Big Catch</span></h2>
             <p class="subtitle">Your ultimate tracker for Pokémon GO events.</p>
+        </section>
+
+        <!-- Search & Filter Section -->
+        <section class="controls-section">
+            <div class="search-box">
+                <i class="ph-bold ph-magnifying-glass"></i>
+                <input type="text" id="event-search" placeholder="Search events or Pokémon...">
+            </div>
+            <div class="filter-box">
+                <i class="ph-bold ph-funnel"></i>
+                <select id="event-filter">
+                    <option value="all">All Event Types</option>
+                    <option value="community-day">Community Day</option>
+                    <option value="raid-hour">Raid Hour</option>
+                    <option value="raid-battles">Raid Battles</option>
+                    <option value="pokemon-spotlight-hour">Spotlight Hour</option>
+                    <option value="pokestop-showcase">Showcases</option>
+                    <option value="max-mondays">Max Mondays</option>
+                    <option value="event">General Events</option>
+                </select>
+            </div>
         </section>
 
         <!-- Current Events -->
@@ -70,7 +121,7 @@
             <div class="modal-body">
                 <div class="modal-info-row">
                     <i class="ph-fill ph-calendar-blank"></i>
-                    <span id="modal-date">Date Range</span>
+                    <span id="modal-date">Date</span>
                 </div>
                 <div class="modal-info-row">
                     <i class="ph-fill ph-clock"></i>
@@ -85,7 +136,7 @@
     </div>
 
     <footer>
-        <p>Built for Trainers by Trainers.</p>
+        <p>Built for Trainers, by Trainers.</p>
     </footer>
 
     <script src="script.js"></script>
