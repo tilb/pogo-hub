@@ -825,7 +825,31 @@ window.openTypeModal = function (type) {
     `;
 }
 
+// Pages without their own event popup (calendar, raids, …) get one added, so every event can be opened
+function ensureEventModal() {
+    if (document.getElementById('event-modal')) return;
+    const modal = document.createElement('div');
+    modal.id = 'event-modal';
+    modal.className = 'modal-overlay hidden';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal-btn"><i class="ph-bold ph-x"></i></button>
+            <div class="modal-header">
+                <span class="modal-type" id="modal-type"></span>
+                <h2 class="modal-title" id="modal-title"></h2>
+            </div>
+            <div class="modal-body">
+                <div class="modal-info-row"><i class="ph-fill ph-calendar-blank"></i><span id="modal-date"></span></div>
+                <div class="modal-info-row"><i class="ph-fill ph-clock"></i><span id="modal-time"></span></div>
+                <p class="modal-desc" id="modal-desc"></p>
+                <div class="modal-extra" id="modal-extra"></div>
+            </div>
+        </div>`;
+    document.body.appendChild(modal);
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    ensureEventModal();
     const closeModalBtn = document.getElementById('close-modal-btn');
     const modal = document.getElementById('event-modal');
     const searchInput = document.getElementById('event-search');
@@ -852,6 +876,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (document.getElementById('saved-events-container')) {
         window.renderSavedEvents();
     }
+    // Other pages (calendar, raids, Pokémon, guide) draw themselves once the events are in
+    document.dispatchEvent(new CustomEvent('eventsloaded'));
     setInterval(window.renderEvents, 60000);
 });
 

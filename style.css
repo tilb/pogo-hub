@@ -1334,3 +1334,605 @@ body {
         flex-wrap: wrap;
     }
 }
+
+/* ── Site menu ────────────────────────────────────────────────────────── */
+.site-menu {
+    display: flex;
+    gap: 0.25rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    padding: 0.3rem;
+    backdrop-filter: blur(var(--glass-blur));
+}
+
+.site-menu-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    transition: color 0.2s, background 0.2s;
+}
+
+.site-menu-link:hover {
+    color: var(--text-primary);
+}
+
+.site-menu-link.is-active {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+}
+
+.site-menu-link i {
+    font-size: 1rem;
+}
+
+@media (max-width: 1000px) {
+    .main-header {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .site-menu {
+        order: 3;
+        width: 100%;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .site-menu::-webkit-scrollbar {
+        display: none;
+    }
+
+    .site-menu-link {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 520px) {
+    .site-menu-link {
+        flex-direction: column;
+        gap: 0.15rem;
+        font-size: 0.72rem;
+        padding: 0.4rem 0.5rem;
+        border-radius: 14px;
+    }
+
+    .site-menu {
+        border-radius: 18px;
+    }
+
+    .site-menu-link i {
+        font-size: 1.15rem;
+    }
+}
+
+/* ── Page heading for the extra pages ─────────────────────────────────── */
+.page-hero {
+    margin: 2rem 0 2.5rem;
+}
+
+.page-hero h2 {
+    font-size: 2.6rem;
+    font-weight: 800;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 600px) {
+    .page-hero h2 {
+        font-size: 2rem;
+    }
+
+    .page-hero .subtitle {
+        font-size: 1.05rem;
+    }
+}
+
+/* ── Calendar (month view) ────────────────────────────────────────────── */
+.cal-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.cal-title {
+    font-size: 1.6rem;
+    margin: 0 0.5rem;
+    min-width: 0;
+}
+
+#cal-today {
+    margin-left: auto;
+}
+
+.cal-empty {
+    margin-bottom: 1rem;
+}
+
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.cal-weekday {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    padding-bottom: 0.25rem;
+}
+
+.cal-day {
+    min-height: 120px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+.cal-day.is-outside {
+    opacity: 0.4;
+}
+
+.cal-day.is-today {
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 1px var(--accent-primary) inset;
+}
+
+.cal-day-number {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.cal-day.is-today .cal-day-number {
+    color: var(--accent-primary);
+}
+
+.cal-day-name {
+    display: none;
+}
+
+.cal-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    width: 100%;
+    min-width: 0;
+    padding: 0.2rem 0.35rem;
+    border: none;
+    border-left: 3px solid var(--accent-primary);
+    border-radius: 6px;
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 0.75rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.cal-chip:hover {
+    background: color-mix(in srgb, var(--accent-primary) 22%, transparent);
+}
+
+.cal-chip img,
+.cal-chip i {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cal-chip-time {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.cal-chip {
+    flex-wrap: wrap;
+    row-gap: 0.1rem;
+}
+
+.cal-chip-name {
+    flex-basis: 100%;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.25;
+    word-break: break-word;
+}
+
+.chip-raid-hour, .chip-raid-battles, .chip-raid-day { border-left-color: var(--accent-red); }
+.chip-community-day, .chip-wild-area { border-left-color: var(--accent-green); }
+.chip-pokemon-spotlight-hour, .chip-season { border-left-color: var(--accent-orange); }
+.chip-max-mondays, .chip-max-battles, .chip-pokemon-go-tour { border-left-color: var(--accent-purple); }
+.chip-go-battle-league, .chip-go-pass, .chip-research, .chip-timed-research { border-left-color: var(--accent-blue); }
+
+.cal-chip.is-extra {
+    display: none;
+}
+
+.cal-day.is-open .cal-chip.is-extra {
+    display: flex;
+}
+
+.cal-day.is-open .cal-more {
+    display: none;
+}
+
+.cal-more {
+    background: none;
+    border: none;
+    color: var(--accent-primary);
+    font-family: var(--font-main);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.1rem 0.35rem;
+    cursor: pointer;
+}
+
+/* On small screens the month becomes a list of days that have events */
+@media (max-width: 760px) {
+    .cal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cal-weekday,
+    .cal-day.is-empty,
+    .cal-day.is-outside {
+        display: none;
+    }
+
+    .cal-day {
+        min-height: 0;
+    }
+
+    .cal-title {
+        font-size: 1.2rem;
+        margin: 0 0.25rem;
+        white-space: nowrap;
+    }
+
+    .cal-day-name {
+        display: inline;
+        text-transform: capitalize;
+    }
+
+    .cal-chip {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.5rem;
+    }
+
+    .cal-chip.is-extra {
+        display: flex;
+    }
+
+    .cal-more {
+        display: none;
+    }
+}
+
+/* ── Raids ────────────────────────────────────────────────────────────── */
+.raid-card {
+    cursor: pointer;
+}
+
+.raid-art {
+    height: 150px;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.raid-art img {
+    height: 130px;
+    max-width: 25%;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.35));
+}
+
+.raid-art img:only-child {
+    max-width: 60%;
+}
+
+.raid-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+}
+
+.raid-bosses {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.raid-boss {
+    padding: 0.25rem 0.7rem;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    background: color-mix(in srgb, var(--accent-primary) 14%, transparent);
+}
+
+.raid-card .event-time {
+    margin-bottom: 0.75rem;
+}
+
+.raid-hours {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: auto;
+}
+
+.raid-hour-link {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+}
+
+.raid-hour-link:hover {
+    border-color: var(--accent-primary);
+}
+
+/* ── Pokémon search ───────────────────────────────────────────────────── */
+.mon-search {
+    max-width: 520px;
+}
+
+.mon-search input {
+    width: 100%;
+    font-size: 1.1rem;
+}
+
+.mon-count {
+    color: var(--text-secondary);
+    margin: 1rem 0 1.5rem;
+}
+
+.mon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1rem;
+}
+
+.mon-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.mon-art {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--accent-primary) 12%, transparent);
+    font-size: 2.5rem;
+    color: var(--accent-primary);
+}
+
+.mon-art img {
+    width: 110px;
+    height: 110px;
+    object-fit: contain;
+}
+
+.mon-name {
+    font-size: 1.2rem;
+    margin: 0.75rem 0 0.5rem;
+}
+
+.mon-events {
+    list-style: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.mon-events button {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    text-align: left;
+    cursor: pointer;
+}
+
+.mon-events button:hover {
+    border-color: var(--accent-primary);
+}
+
+.mon-event-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.mon-event-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.mon-none {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.mon-none img {
+    width: 96px;
+    height: 96px;
+    object-fit: contain;
+}
+
+/* ── Guide ────────────────────────────────────────────────────────────── */
+.guide-jumps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.guide-jump {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 99px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.guide-jump:hover {
+    border-color: var(--accent-primary);
+}
+
+.guide-jump i {
+    color: var(--accent-primary);
+}
+
+.guide-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.guide-card {
+    display: flex;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    overflow: hidden;
+    scroll-margin-top: 1.5rem;
+}
+
+.guide-art {
+    width: 140px;
+    flex-shrink: 0;
+    font-size: 3rem;
+}
+
+.guide-body {
+    padding: 1.25rem 1.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.guide-body h3 {
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.guide-desc {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+.guide-bonus {
+    font-size: 0.95rem;
+    margin-bottom: 0.75rem;
+}
+
+.guide-subtitle {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-primary);
+    margin: 0.75rem 0 0.4rem;
+}
+
+.guide-tips {
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    line-height: 1.45;
+}
+
+.guide-next {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--card-border);
+    background: transparent;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.guide-next:hover {
+    border-color: var(--accent-primary);
+}
+
+.guide-next i {
+    color: var(--accent-primary);
+    flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+    .guide-card {
+        flex-direction: column;
+    }
+
+    .guide-art {
+        width: 100%;
+        height: 90px;
+    }
+}

@@ -85,6 +85,40 @@ const translations = {
         'calendar.back': 'Back to events',
         'calendar.empty': 'No events saved yet. Go explore!',
         'calendar.remove': 'Remove from Calendar',
+        'menu.home': 'Home',
+        'menu.calendar': 'Calendar',
+        'menu.raids': 'Raids',
+        'menu.pokemon': 'Pokémon',
+        'menu.guide': 'Guide',
+        'page.calendar.title': 'Event <span class="text-gradient">Calendar</span>',
+        'page.calendar.subtitle': 'Every event on the day it starts. Plan your month ahead.',
+        'page.raids.title': 'Raid <span class="text-gradient">Bosses</span>',
+        'page.raids.subtitle': 'Who you can fight in raids right now and soon.',
+        'page.pokemon.title': 'Find a <span class="text-gradient">Pokémon</span>',
+        'page.pokemon.subtitle': 'See which events a Pokémon shows up in.',
+        'page.pokemon.placeholder': 'Type a Pokémon, for example Pawniard',
+        'page.guide.title': 'Event <span class="text-gradient">Guide</span>',
+        'page.guide.subtitle': 'What each type of event is, and how to get the most out of it.',
+        'calendar.more': '+{count} more',
+        'calendar.prev': 'Previous month',
+        'calendar.next': 'Next month',
+        'calendar.emptyMonth': 'No events in this month yet.',
+        'raids.live': 'Raiding Now',
+        'raids.upcoming': 'Coming Up',
+        'raids.days': 'Raid Days',
+        'raids.soon': 'Soon',
+        'raids.starts': 'Starts {date}, {time}',
+        'raids.raidHour': 'Raid Hour: {date}, {time}',
+        'raids.noneLive': 'No raid bosses right now.',
+        'raids.noneUpcoming': 'No upcoming raids announced yet.',
+        'pokemon.notInEvents': '{name} isn\'t in any event right now.',
+        'pokemon.noMatch': 'No Pokémon found for "{query}".',
+        'pokemon.empty': 'No Pokémon in upcoming events yet.',
+        'pokemon.countAll': '{count} Pokémon in current and upcoming events',
+        'pokemon.countResults': '{count} found',
+        'guide.tips': 'Tips',
+        'guide.next': 'Next up',
+        'guide.now': 'Happening now',
         'nav.home': 'Home',
         'footer': 'Built for Trainers, by Trainers.',
         'settings.title': 'Settings',
@@ -167,6 +201,40 @@ const translations = {
         'calendar.back': 'Terug naar evenementen',
         'calendar.empty': 'Je hebt nog niets bewaard. Ga op ontdekking!',
         'calendar.remove': 'Uit agenda halen',
+        'menu.home': 'Home',
+        'menu.calendar': 'Kalender',
+        'menu.raids': 'Raids',
+        'menu.pokemon': 'Pokémon',
+        'menu.guide': 'Uitleg',
+        'page.calendar.title': 'Evenementen<span class="text-gradient">kalender</span>',
+        'page.calendar.subtitle': 'Elk evenement op de dag dat het begint. Zo plan je je maand vooruit.',
+        'page.raids.title': '<span class="text-gradient">Raidbazen</span>',
+        'page.raids.subtitle': 'Wie je nu en binnenkort in raids kunt verslaan.',
+        'page.pokemon.title': 'Zoek een <span class="text-gradient">Pokémon</span>',
+        'page.pokemon.subtitle': 'Zie in welke evenementen een Pokémon voorkomt.',
+        'page.pokemon.placeholder': 'Typ een Pokémon, bijvoorbeeld Pawniard',
+        'page.guide.title': '<span class="text-gradient">Uitleg</span> per evenement',
+        'page.guide.subtitle': 'Wat elk soort evenement is, en hoe je er het meeste uithaalt.',
+        'calendar.more': '+{count} meer',
+        'calendar.prev': 'Vorige maand',
+        'calendar.next': 'Volgende maand',
+        'calendar.emptyMonth': 'Nog geen evenementen in deze maand.',
+        'raids.live': 'Nu te raiden',
+        'raids.upcoming': 'Binnenkort',
+        'raids.days': 'Raid Days',
+        'raids.soon': 'Binnenkort',
+        'raids.starts': 'Begint {date}, {time}',
+        'raids.raidHour': 'Raid Hour: {date}, {time}',
+        'raids.noneLive': 'Er zijn nu geen raidbazen.',
+        'raids.noneUpcoming': 'Er zijn nog geen nieuwe raids aangekondigd.',
+        'pokemon.notInEvents': '{name} komt nu in geen enkel evenement voor.',
+        'pokemon.noMatch': 'Geen Pokémon gevonden voor "{query}".',
+        'pokemon.empty': 'Nog geen Pokémon in komende evenementen.',
+        'pokemon.countAll': '{count} Pokémon in lopende en komende evenementen',
+        'pokemon.countResults': '{count} gevonden',
+        'guide.tips': 'Tips',
+        'guide.next': 'Hierna',
+        'guide.now': 'Nu bezig',
         'nav.home': 'Home',
         'footer': 'Gemaakt voor trainers, door trainers.',
         'settings.title': 'Instellingen',
@@ -292,11 +360,44 @@ function closeSettings() {
     setTimeout(() => modal.classList.add('hidden'), 300);
 }
 
-// Add the gear button to the header and the settings window to the page
+// The site menu, the same on every page
+const MENU = [
+    { href: 'index.html', icon: 'ph-house', key: 'menu.home' },
+    { href: 'month.html', icon: 'ph-calendar', key: 'menu.calendar' },
+    { href: 'raids.html', icon: 'ph-sword', key: 'menu.raids' },
+    { href: 'pokemon.html', icon: 'ph-magnifying-glass', key: 'menu.pokemon' },
+    { href: 'guide.html', icon: 'ph-book-open', key: 'menu.guide' }
+];
+
+function buildMenu() {
+    const header = document.querySelector('.main-header');
+    if (!header || header.querySelector('.site-menu')) return;
+
+    const page = location.pathname.split('/').pop() || 'index.html';
+    const menu = document.createElement('nav');
+    menu.className = 'site-menu';
+    menu.setAttribute('aria-label', 'Menu');
+    menu.innerHTML = MENU.map(item => `
+        <a href="${item.href}" class="site-menu-link${item.href === page ? ' is-active' : ''}"${item.href === page ? ' aria-current="page"' : ''}>
+            <i class="ph-bold ${item.icon}"></i><span data-i18n="${item.key}">${window.t(item.key)}</span>
+        </a>`).join('');
+
+    const logo = header.querySelector('.logo-container');
+    if (logo) {
+        logo.style.cursor = 'pointer';
+        logo.onclick = () => { window.location.href = 'index.html'; };
+        logo.after(menu);
+    } else {
+        header.prepend(menu);
+    }
+}
+
+// Add the menu and gear button to the header and the settings window to the page
 document.addEventListener('DOMContentLoaded', () => {
+    buildMenu();
     translatePage();
 
-    const nav = document.querySelector('.main-header nav');
+    const nav = document.querySelector('.main-header nav:not(.site-menu)');
     if (nav) {
         const btn = document.createElement('button');
         btn.className = 'nav-btn settings-btn';
