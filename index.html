@@ -8,10 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="config.js?v=4"></script>
+    <meta name="theme-color" content="#0f172a">
+    <script src="settings.js?v=5"></script>
+    <script src="config.js?v=5"></script>
 </head>
 
 <body>
@@ -28,7 +30,7 @@
         <nav>
             <div id="auth-section">
                 <!-- Javascript will populate this -->
-                <button class="nav-btn primary" onclick="window.openAuthModal()">Login / Sign Up</button>
+                
             </div>
         </nav>
     </header>
@@ -37,23 +39,23 @@
     <div id="auth-modal" class="modal-overlay hidden">
         <div class="modal-content" style="max-width: 400px; text-align: center;">
             <button class="close-modal" id="close-auth-btn"><i class="ph-bold ph-x"></i></button>
-            <h2 style="margin-bottom: 0.5rem;">Trainer Login</h2>
-            <p class="subtitle" style="margin-bottom: 1.5rem;">Sign in to sync your calendar</p>
+            <h2 style="margin-bottom: 0.5rem;" data-i18n="auth.title">Trainer Login</h2>
+            <p class="subtitle" style="margin-bottom: 1.5rem;" data-i18n="auth.subtitle">Sign in to sync your calendar</p>
 
             <form id="auth-form" onsubmit="event.preventDefault(); window.handleLogin();">
                 <div class="search-box" style="margin-bottom: 1rem;">
                     <i class="ph-bold ph-envelope"></i>
-                    <input type="email" id="email" placeholder="Email address" required style="width: 100%;">
+                    <input type="email" id="email" placeholder="Email address" data-i18n-placeholder="auth.email" required style="width: 100%;">
                 </div>
                 <div class="search-box" style="margin-bottom: 1rem;">
                     <i class="ph-bold ph-lock-key"></i>
-                    <input type="password" id="password" placeholder="Password (min. 6 characters)" required
+                    <input type="password" id="password" placeholder="Password (min. 6 characters)" data-i18n-placeholder="auth.password" required
                         minlength="6" style="width: 100%;">
                 </div>
-                <button type="submit" class="action-btn" style="width: 100%; margin-bottom: 0.5rem;">Login</button>
+                <button type="submit" class="action-btn" style="width: 100%; margin-bottom: 0.5rem;" data-i18n="auth.login">Login</button>
                 <button type="button" class="action-btn"
-                    style="width: 100%; background: transparent; border: 1px solid var(--border-color);"
-                    onclick="window.handleSignUp()">Create Account</button>
+                    style="width: 100%; background: transparent; border: 1px solid var(--card-border); color: var(--text-primary);"
+                    onclick="window.handleSignUp()" data-i18n="auth.create">Create Account</button>
             </form>
         </div>
     </div>
@@ -61,27 +63,27 @@
     <main class="container">
         <!-- Hero Section -->
         <section class="hero">
-            <h2>Don't miss the next <span class="text-gradient">Big Catch</span></h2>
-            <p class="subtitle">Your ultimate tracker for Pokémon GO events.</p>
+            <h2 data-i18n-html="hero.title">Don't miss the next <span class="text-gradient">Big Catch</span></h2>
+            <p class="subtitle" data-i18n="hero.subtitle">Your ultimate tracker for Pokémon GO events.</p>
         </section>
 
         <!-- Search & Filter Section -->
         <section class="controls-section">
             <div class="search-box">
                 <i class="ph-bold ph-magnifying-glass"></i>
-                <input type="text" id="event-search" placeholder="Search events or Pokémon...">
+                <input type="text" id="event-search" placeholder="Search events or Pokémon..." data-i18n-placeholder="search.placeholder">
             </div>
             <div class="filter-box">
                 <i class="ph-bold ph-funnel"></i>
                 <select id="event-filter">
-                    <option value="all">All Event Types</option>
-                    <option value="community-day">Community Day</option>
-                    <option value="raid-hour">Raid Hour</option>
-                    <option value="raid-battles">Raid Battles</option>
-                    <option value="pokemon-spotlight-hour">Spotlight Hour</option>
-                    <option value="pokestop-showcase">Showcases</option>
-                    <option value="max-mondays">Max Mondays</option>
-                    <option value="event">General Events</option>
+                    <option value="all" data-i18n="filter.all">All Event Types</option>
+                    <option value="community-day" data-i18n="filter.community-day">Community Day</option>
+                    <option value="raid-hour" data-i18n="filter.raid-hour">Raid Hour</option>
+                    <option value="raid-battles" data-i18n="filter.raid-battles">Raid Battles</option>
+                    <option value="pokemon-spotlight-hour" data-i18n="filter.pokemon-spotlight-hour">Spotlight Hour</option>
+                    <option value="pokestop-showcase" data-i18n="filter.pokestop-showcase">Showcases</option>
+                    <option value="max-mondays" data-i18n="filter.max-mondays">Max Mondays</option>
+                    <option value="event" data-i18n="filter.event">General Events</option>
                 </select>
             </div>
         </section>
@@ -89,33 +91,33 @@
         <!-- This Week -->
         <section class="section-block" id="this-week">
             <div class="section-header">
-                <h3><i class="ph-fill ph-calendar-dots"></i> This Week</h3>
+                <h3><i class="ph-fill ph-calendar-dots"></i> <span data-i18n="section.week">This Week</span></h3>
             </div>
             <div class="week-layout" id="week-events-container">
-                <div class="loading-state">Loading this week...</div>
+                <div class="loading-state" data-i18n="loading.week">Loading this week...</div>
             </div>
         </section>
 
         <!-- Current Events -->
         <section class="section-block" id="current-events">
             <div class="section-header">
-                <h3><i class="ph-fill ph-broadcast"></i> Live Now</h3>
+                <h3><i class="ph-fill ph-broadcast"></i> <span data-i18n="section.live">Live Now</span></h3>
                 <span class="live-indicator"></span>
             </div>
             <div class="cards-grid" id="active-events-container">
                 <!-- Javascript will populate this -->
-                <div class="loading-state">Loading active events...</div>
+                <div class="loading-state" data-i18n="loading.active">Loading active events...</div>
             </div>
         </section>
 
         <!-- Upcoming Events -->
         <section class="section-block" id="upcoming-events">
             <div class="section-header">
-                <h3><i class="ph-fill ph-clock-countdown"></i> Coming Soon</h3>
+                <h3><i class="ph-fill ph-clock-countdown"></i> <span data-i18n="section.upcoming">Coming Soon</span></h3>
             </div>
             <div class="list-layout" id="upcoming-events-container">
                 <!-- Javascript will populate this -->
-                <div class="loading-state">Loading upcoming events...</div>
+                <div class="loading-state" data-i18n="loading.upcoming">Loading upcoming events...</div>
             </div>
         </section>
     </main>
@@ -146,10 +148,10 @@
     </div>
 
     <footer>
-        <p>Built for Trainers, by Trainers.</p>
+        <p data-i18n="footer">Built for Trainers, by Trainers.</p>
     </footer>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=5"></script>
 </body>
 
 </html>

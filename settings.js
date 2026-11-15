@@ -1,0 +1,332 @@
+// Settings: language and colour theme.
+// Loaded in <head> so the saved theme and language apply before the page shows.
+
+const THEMES = [
+    { id: 'midnight', bg: '#0f172a', accent: '#818cf8', accent2: '#c084fc' },
+    { id: 'ocean', bg: '#071a2b', accent: '#38bdf8', accent2: '#2dd4bf' },
+    { id: 'forest', bg: '#0b1a14', accent: '#4ade80', accent2: '#a3e635' },
+    { id: 'sunset', bg: '#1c1017', accent: '#fb923c', accent2: '#f472b6' },
+    { id: 'light', bg: '#f5f6fb', accent: '#6366f1', accent2: '#a855f7' }
+];
+
+const LANGUAGES = [
+    { id: 'en', label: 'English' },
+    { id: 'nl', label: 'Nederlands' }
+];
+
+const translations = {
+    en: {
+        'hero.title': "Don't miss the next <span class=\"text-gradient\">Big Catch</span>",
+        'hero.subtitle': 'Your ultimate tracker for Pokémon GO events.',
+        'search.placeholder': 'Search events or Pokémon...',
+        'filter.all': 'All Event Types',
+        'filter.community-day': 'Community Day',
+        'filter.raid-hour': 'Raid Hour',
+        'filter.raid-battles': 'Raid Battles',
+        'filter.pokemon-spotlight-hour': 'Spotlight Hour',
+        'filter.pokestop-showcase': 'Showcases',
+        'filter.max-mondays': 'Max Mondays',
+        'filter.event': 'General Events',
+        'section.week': 'This Week',
+        'section.live': 'Live Now',
+        'section.upcoming': 'Coming Soon',
+        'loading.week': 'Loading this week...',
+        'loading.active': 'Loading active events...',
+        'loading.upcoming': 'Loading upcoming events...',
+        'empty.active': 'No matching active events right now.',
+        'empty.upcoming': 'No matching upcoming events found.',
+        'empty.week': 'Nothing new starts this week.',
+        'error.load': 'Oops! Could not load events. Please try again later.',
+        'card.endsIn': 'Ends in {time}',
+        'card.activeNow': 'Active Now',
+        'card.viewDetails': 'View Details',
+        'card.startsIn': 'Starts in {time} (at {clock})',
+        'card.save': 'Save',
+        'card.saved': 'Saved',
+        'week.today': 'Today',
+        'week.tomorrow': 'Tomorrow',
+        'week.live': 'Live',
+        'week.ended': 'Ended',
+        'time.d': 'd',
+        'time.h': 'h',
+        'time.m': 'm',
+        'modal.about': 'About {name}',
+        'modal.addToCalendar': 'Add to Calendar',
+        'modal.whatIs': 'What is a {name}?',
+        'modal.guide': 'Guide',
+        'modal.generalInfo': 'General Info',
+        'modal.alwaysActive': 'Always active',
+        'modal.typicalBonuses': 'Typical Bonuses:',
+        'modal.shiny': 'Can be shiny',
+        'auth.title': 'Trainer Login',
+        'auth.subtitle': 'Sign in to sync your calendar',
+        'auth.email': 'Email address',
+        'auth.password': 'Password (min. 6 characters)',
+        'auth.login': 'Login',
+        'auth.create': 'Create Account',
+        'auth.loginSignup': 'Login / Sign Up',
+        'auth.myCalendar': 'My Calendar',
+        'auth.logout': 'Logout ({name})',
+        'auth.admin': 'Admin',
+        'auth.bothFields': 'Please enter both email and password.',
+        'auth.loginFailed': 'Login failed: {message}',
+        'auth.passwordShort': 'Password must be at least 6 characters.',
+        'auth.signupFailed': 'Sign up failed: {message}',
+        'auth.checkEmail': 'Account created! Check your email to confirm it, then log in.',
+        'auth.saveFailed': 'Could not update your calendar: {message}',
+        'calendar.title': 'My <span class="text-gradient">Saved Events</span>',
+        'calendar.welcome': 'Welcome back!',
+        'calendar.welcomeName': 'Welcome back, {name}!',
+        'calendar.loading': 'Loading your schedule...',
+        'calendar.loginRequired': 'Login Required',
+        'calendar.loginText': 'Please log in to view your personal calendar.',
+        'calendar.goToLogin': 'Go to Login',
+        'calendar.noAccounts': "Accounts aren't available yet. Check back soon!",
+        'calendar.back': 'Back to events',
+        'calendar.empty': 'No events saved yet. Go explore!',
+        'calendar.remove': 'Remove from Calendar',
+        'nav.home': 'Home',
+        'footer': 'Built for Trainers, by Trainers.',
+        'settings.title': 'Settings',
+        'settings.open': 'Settings',
+        'settings.language': 'Language',
+        'settings.theme': 'Theme',
+        'theme.midnight': 'Midnight',
+        'theme.ocean': 'Ocean',
+        'theme.forest': 'Forest',
+        'theme.sunset': 'Sunset',
+        'theme.light': 'Light'
+    },
+    nl: {
+        'hero.title': 'Mis nooit meer een <span class="text-gradient">grote vangst</span>',
+        'hero.subtitle': 'Al je Pokémon GO-evenementen op één plek.',
+        'search.placeholder': 'Zoek evenementen of Pokémon...',
+        'filter.all': 'Alle soorten',
+        'filter.community-day': 'Community Day',
+        'filter.raid-hour': 'Raid Hour',
+        'filter.raid-battles': 'Raids',
+        'filter.pokemon-spotlight-hour': 'Spotlight Hour',
+        'filter.pokestop-showcase': 'Showcases',
+        'filter.max-mondays': 'Max Mondays',
+        'filter.event': 'Overige evenementen',
+        'section.week': 'Deze week',
+        'section.live': 'Nu bezig',
+        'section.upcoming': 'Binnenkort',
+        'loading.week': 'Deze week laden...',
+        'loading.active': 'Lopende evenementen laden...',
+        'loading.upcoming': 'Komende evenementen laden...',
+        'empty.active': 'Er loopt nu niets dat hierbij past.',
+        'empty.upcoming': 'Geen komende evenementen gevonden.',
+        'empty.week': 'Deze week begint er niets nieuws.',
+        'error.load': 'Oeps! De evenementen konden niet laden. Probeer het later opnieuw.',
+        'card.endsIn': 'Eindigt over {time}',
+        'card.activeNow': 'Nu bezig',
+        'card.viewDetails': 'Bekijk details',
+        'card.startsIn': 'Begint over {time} (om {clock})',
+        'card.save': 'Bewaren',
+        'card.saved': 'Bewaard',
+        'week.today': 'Vandaag',
+        'week.tomorrow': 'Morgen',
+        'week.live': 'Bezig',
+        'week.ended': 'Voorbij',
+        'time.d': 'd',
+        'time.h': 'u',
+        'time.m': 'm',
+        'modal.about': 'Over {name}',
+        'modal.addToCalendar': 'Zet in agenda',
+        'modal.whatIs': 'Wat is een {name}?',
+        'modal.guide': 'Uitleg',
+        'modal.generalInfo': 'Algemene info',
+        'modal.alwaysActive': 'Altijd geldig',
+        'modal.typicalBonuses': 'Gebruikelijke bonussen:',
+        'modal.shiny': 'Kan shiny zijn',
+        'auth.title': 'Inloggen',
+        'auth.subtitle': 'Log in om je agenda overal te zien',
+        'auth.email': 'E-mailadres',
+        'auth.password': 'Wachtwoord (minimaal 6 tekens)',
+        'auth.login': 'Inloggen',
+        'auth.create': 'Account maken',
+        'auth.loginSignup': 'Inloggen / Aanmelden',
+        'auth.myCalendar': 'Mijn agenda',
+        'auth.logout': 'Uitloggen ({name})',
+        'auth.admin': 'Beheer',
+        'auth.bothFields': 'Vul je e-mailadres en wachtwoord in.',
+        'auth.loginFailed': 'Inloggen mislukt: {message}',
+        'auth.passwordShort': 'Je wachtwoord moet minstens 6 tekens hebben.',
+        'auth.signupFailed': 'Aanmelden mislukt: {message}',
+        'auth.checkEmail': 'Account gemaakt! Bevestig het via de mail die je hebt gekregen en log daarna in.',
+        'auth.saveFailed': 'Je agenda kon niet worden bijgewerkt: {message}',
+        'calendar.title': 'Mijn <span class="text-gradient">bewaarde evenementen</span>',
+        'calendar.welcome': 'Welkom terug!',
+        'calendar.welcomeName': 'Welkom terug, {name}!',
+        'calendar.loading': 'Je agenda laden...',
+        'calendar.loginRequired': 'Inloggen nodig',
+        'calendar.loginText': 'Log in om je eigen agenda te zien.',
+        'calendar.goToLogin': 'Naar inloggen',
+        'calendar.noAccounts': 'Accounts zijn er nog niet. Kom binnenkort terug!',
+        'calendar.back': 'Terug naar evenementen',
+        'calendar.empty': 'Je hebt nog niets bewaard. Ga op ontdekking!',
+        'calendar.remove': 'Uit agenda halen',
+        'nav.home': 'Home',
+        'footer': 'Gemaakt voor trainers, door trainers.',
+        'settings.title': 'Instellingen',
+        'settings.open': 'Instellingen',
+        'settings.language': 'Taal',
+        'settings.theme': 'Thema',
+        'theme.midnight': 'Middernacht',
+        'theme.ocean': 'Oceaan',
+        'theme.forest': 'Bos',
+        'theme.sunset': 'Zonsondergang',
+        'theme.light': 'Licht'
+    }
+};
+
+function readSetting(key, fallback) {
+    try { return localStorage.getItem(key) || fallback; } catch { return fallback; }
+}
+
+function writeSetting(key, value) {
+    try { localStorage.setItem(key, value); } catch { /* private mode: setting lasts until reload */ }
+}
+
+const defaultLang = (navigator.language || 'en').toLowerCase().startsWith('nl') ? 'nl' : 'en';
+window.siteSettings = {
+    lang: readSetting('pogo_lang', defaultLang),
+    theme: readSetting('pogo_theme', 'midnight')
+};
+if (!translations[window.siteSettings.lang]) window.siteSettings.lang = 'en';
+if (!THEMES.some(th => th.id === window.siteSettings.theme)) window.siteSettings.theme = 'midnight';
+
+// Translate a key, filling in {placeholders}
+window.t = function (key, vars = {}) {
+    const dict = translations[window.siteSettings.lang] || translations.en;
+    const text = dict[key] ?? translations.en[key] ?? key;
+    return text.replace(/\{(\w+)\}/g, (_, name) => vars[name] ?? '');
+}
+
+// Locale for dates and times: Dutch uses a 24-hour clock
+window.dateLocale = () => window.siteSettings.lang === 'nl' ? 'nl-NL' : 'en-US';
+window.timeOptions = () => window.siteSettings.lang === 'nl'
+    ? { hour: '2-digit', minute: '2-digit', hour12: false }
+    : { hour: 'numeric', minute: '2-digit' };
+
+function applyTheme(theme) {
+    document.documentElement.dataset.theme = theme;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const bg = THEMES.find(th => th.id === theme)?.bg;
+    if (meta && bg) meta.content = bg;
+}
+
+// Fill in every element marked with data-i18n (text), data-i18n-html (with markup) or data-i18n-placeholder
+function translatePage() {
+    document.documentElement.lang = window.siteSettings.lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = window.t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-html]').forEach(el => { el.innerHTML = window.t(el.dataset.i18nHtml); });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = window.t(el.dataset.i18nPlaceholder); });
+}
+
+applyTheme(window.siteSettings.theme);
+
+function setLanguage(lang) {
+    window.siteSettings.lang = lang;
+    writeSetting('pogo_lang', lang);
+    translatePage();
+    renderSettingsPanel();
+    // Let the page redraw what it built in JavaScript (cards, lists, header)
+    document.dispatchEvent(new CustomEvent('languagechange'));
+}
+
+function setTheme(theme) {
+    window.siteSettings.theme = theme;
+    writeSetting('pogo_theme', theme);
+    applyTheme(theme);
+    renderSettingsPanel();
+}
+
+function renderSettingsPanel() {
+    const body = document.getElementById('settings-body');
+    if (!body) return;
+    const { lang, theme } = window.siteSettings;
+
+    document.getElementById('settings-title').textContent = window.t('settings.title');
+    body.innerHTML = `
+        <div class="settings-group">
+            <span class="settings-label">${window.t('settings.language')}</span>
+            <div class="settings-options">
+                ${LANGUAGES.map(l => `
+                    <button type="button" class="settings-choice${l.id === lang ? ' is-active' : ''}" data-lang="${l.id}" aria-pressed="${l.id === lang}">${l.label}</button>
+                `).join('')}
+            </div>
+        </div>
+        <div class="settings-group">
+            <span class="settings-label">${window.t('settings.theme')}</span>
+            <div class="settings-themes">
+                ${THEMES.map(th => `
+                    <button type="button" class="theme-swatch${th.id === theme ? ' is-active' : ''}" data-theme-choice="${th.id}" aria-pressed="${th.id === theme}">
+                        <span class="swatch-preview" style="background: ${th.bg};">
+                            <span style="background: ${th.accent};"></span>
+                            <span style="background: ${th.accent2};"></span>
+                        </span>
+                        <span class="swatch-name">${window.t('theme.' + th.id)}</span>
+                    </button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+
+    body.querySelectorAll('[data-lang]').forEach(btn => btn.onclick = () => setLanguage(btn.dataset.lang));
+    body.querySelectorAll('[data-theme-choice]').forEach(btn => btn.onclick = () => setTheme(btn.dataset.themeChoice));
+}
+
+function openSettings() {
+    const modal = document.getElementById('settings-modal');
+    renderSettingsPanel();
+    modal.classList.remove('hidden');
+    void modal.offsetWidth;
+    modal.classList.add('visible');
+}
+
+function closeSettings() {
+    const modal = document.getElementById('settings-modal');
+    modal.classList.remove('visible');
+    setTimeout(() => modal.classList.add('hidden'), 300);
+}
+
+// Add the gear button to the header and the settings window to the page
+document.addEventListener('DOMContentLoaded', () => {
+    translatePage();
+
+    const nav = document.querySelector('.main-header nav');
+    if (nav) {
+        const btn = document.createElement('button');
+        btn.className = 'nav-btn settings-btn';
+        btn.id = 'settings-btn';
+        btn.type = 'button';
+        btn.title = window.t('settings.open');
+        btn.setAttribute('aria-label', window.t('settings.open'));
+        btn.innerHTML = '<i class="ph-bold ph-gear-six"></i>';
+        btn.onclick = openSettings;
+        nav.appendChild(btn);
+        document.addEventListener('languagechange', () => {
+            btn.title = window.t('settings.open');
+            btn.setAttribute('aria-label', window.t('settings.open'));
+        });
+    }
+
+    const modal = document.createElement('div');
+    modal.id = 'settings-modal';
+    modal.className = 'modal-overlay hidden';
+    modal.innerHTML = `
+        <div class="modal-content settings-content" role="dialog" aria-labelledby="settings-title">
+            <button class="close-modal" type="button" aria-label="Close"><i class="ph-bold ph-x"></i></button>
+            <h2 id="settings-title" class="settings-title"></h2>
+            <div id="settings-body"></div>
+        </div>`;
+    modal.querySelector('.close-modal').onclick = closeSettings;
+    modal.onclick = (e) => { if (e.target === modal) closeSettings(); };
+    document.body.appendChild(modal);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('visible')) closeSettings();
+    });
+});

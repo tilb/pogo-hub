@@ -83,7 +83,7 @@ function updatePreview() {
         name: f.name, eventID: adminState.editingId || 'preview', eventType: f.type, start, end,
         pokemon: f.pokemon, bonuses: f.bonuses, promoCodes: f.promo_codes, description: f.description
     };
-    const def = eventDefinitions[f.type] || eventDefinitions['default'];
+    const def = getDef(f.type);
     $('f-preview').innerHTML = `<strong>Visitors will read:</strong> ${escapeHtml(buildEventSummary(preview, def))}`;
 }
 
@@ -109,7 +109,7 @@ function renderAdminList() {
     list.innerHTML = adminState.events.map(r => {
         const start = new Date(r.starts_at);
         const end = new Date(r.ends_at);
-        const def = eventDefinitions[r.type] || eventDefinitions['default'];
+        const def = getDef(r.type);
         const past = end < now;
         return `
             <div class="list-item admin-row${past ? ' is-past' : ''}">

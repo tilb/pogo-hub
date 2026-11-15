@@ -8,10 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="style.css?v=5">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="config.js?v=4"></script>
+    <meta name="theme-color" content="#0f172a">
+    <script src="settings.js?v=5"></script>
+    <script src="config.js?v=5"></script>
     <style>
         .calendar-header {
             margin-top: 2rem;
@@ -61,7 +63,7 @@
             <h1>PoGo<span class="highlight">Hub</span></h1>
         </div>
         <nav>
-            <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
+            <button class="nav-btn" onclick="window.location.href='index.html'" data-i18n="nav.home">Home</button>
             <div id="auth-section">
                 <!-- Javascript will populate this -->
             </div>
@@ -71,30 +73,30 @@
     <main class="container">
         <div id="calendar-view" style="display: none;">
             <div class="calendar-header">
-                <h2><i class="ph-fill ph-check-square-offset"></i> My <span class="text-gradient">Saved Events</span>
+                <h2><i class="ph-fill ph-check-square-offset"></i> <span data-i18n-html="calendar.title">My <span class="text-gradient">Saved Events</span></span>
                 </h2>
-                <p class="subtitle" id="user-welcome">Welcome back!</p>
+                <p class="subtitle" id="user-welcome" data-i18n="calendar.welcome">Welcome back!</p>
             </div>
 
             <div id="saved-events-container" class="saved-events-grid">
                 <!-- Saved events go here -->
-                <p>Loading your schedule...</p>
+                <p data-i18n="calendar.loading">Loading your schedule...</p>
             </div>
         </div>
 
         <div id="login-required" class="auth-check-msg">
-            <h2><i class="ph-duotone ph-lock-key"></i> Login Required</h2>
-            <p>Please log in to view your personal calendar.</p>
+            <h2><i class="ph-duotone ph-lock-key"></i> <span data-i18n="calendar.loginRequired">Login Required</span></h2>
+            <p id="login-text" data-i18n="calendar.loginText">Please log in to view your personal calendar.</p>
             <button class="action-btn" onclick="window.location.href='index.html'"
-                style="margin-top: 1rem; display: inline-block; width: auto; padding: 0.8rem 2rem;">Go to Login</button>
+                style="margin-top: 1rem; display: inline-block; width: auto; padding: 0.8rem 2rem;" id="login-button" data-i18n="calendar.goToLogin">Go to Login</button>
         </div>
     </main>
 
     <footer>
-        <p>Built for Trainers, by Trainers.</p>
+        <p data-i18n="footer">Built for Trainers, by Trainers.</p>
     </footer>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=5"></script>
     <script>
         // Inline script to init calendar view using Supabase auth
         // (script.js updates the header and fills in the saved events once they're loaded)
@@ -105,13 +107,19 @@
                 document.getElementById('calendar-view').style.display = 'block';
                 document.getElementById('login-required').style.display = 'none';
                 const displayName = session.user.email.split('@')[0];
-                document.getElementById('user-welcome').textContent = `Welcome back, ${displayName}!`;
+                const welcome = document.getElementById('user-welcome');
+                welcome.removeAttribute('data-i18n');
+                const showWelcome = () => { welcome.textContent = window.t('calendar.welcomeName', { name: displayName }); };
+                showWelcome();
+                document.addEventListener('languagechange', showWelcome);
             } else {
                 document.getElementById('calendar-view').style.display = 'none';
                 document.getElementById('login-required').style.display = 'block';
                 if (!window.supabaseClient) {
-                    document.querySelector('#login-required p').textContent = "Accounts aren't available yet. Check back soon!";
-                    document.querySelector('#login-required button').textContent = 'Back to events';
+                    document.getElementById('login-text').dataset.i18n = 'calendar.noAccounts';
+                    document.getElementById('login-button').dataset.i18n = 'calendar.back';
+                    document.getElementById('login-text').textContent = window.t('calendar.noAccounts');
+                    document.getElementById('login-button').textContent = window.t('calendar.back');
                 }
             }
         });
