@@ -1936,3 +1936,273 @@ body {
         height: 90px;
     }
 }
+
+/* ── Friends (friend codes per town) ──────────────────────────────────── */
+.friend-hint {
+    color: var(--text-secondary);
+    margin: 1rem 0;
+}
+
+.town-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.town-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 99px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.town-chip:hover {
+    border-color: var(--accent-primary);
+}
+
+.town-chip span {
+    font-size: 0.75rem;
+    padding: 0.05rem 0.45rem;
+    border-radius: 99px;
+    background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
+}
+
+.friend-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 1rem;
+}
+
+.friend-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.friend-card.is-mine {
+    border-color: var(--accent-primary);
+}
+
+.friend-top {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.friend-name {
+    font-weight: 700;
+}
+
+.friend-you {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.1rem 0.45rem;
+    border-radius: 99px;
+    color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+}
+
+.team-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.team-mystic { background: #3b82f6; }
+.team-valor { background: #ef4444; }
+.team-instinct { background: #eab308; }
+
+.friend-code {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    border: 1px dashed color-mix(in srgb, var(--accent-primary) 60%, transparent);
+    background: color-mix(in srgb, var(--accent-primary) 8%, transparent);
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    cursor: pointer;
+}
+
+.friend-code code {
+    font-size: 1.05rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    text-align: left;
+}
+
+.my-code-key .friend-code code {
+    white-space: normal;
+    word-break: break-all;
+    font-size: 0.85rem;
+}
+
+.friend-code:hover {
+    border-style: solid;
+}
+
+.friend-meta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.friend-note {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-top: 1rem;
+}
+
+.friend-note i {
+    margin-top: 0.15rem;
+    color: var(--accent-primary);
+}
+
+.friend-form {
+    margin-bottom: 1rem;
+}
+
+.my-code-card {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--accent-primary);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+}
+
+.my-code-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-primary);
+}
+
+.my-code-value {
+    display: block;
+    font-size: 1.6rem;
+    letter-spacing: 2px;
+    margin: 0.3rem 0;
+}
+
+.my-code-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.nav-btn.danger {
+    color: #ff6b61;
+    border-color: rgba(255, 69, 58, 0.4);
+}
+
+.nav-btn.danger:hover {
+    background: rgba(255, 69, 58, 0.12);
+}
+
+.my-code-key {
+    flex-basis: 100%;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.my-code-key summary {
+    cursor: pointer;
+    padding: 0.25rem 0;
+}
+
+.my-code-key p {
+    margin: 0.5rem 0;
+    line-height: 1.5;
+}
+
+.key-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.key-form input {
+    flex: 1;
+    min-width: 160px;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    color: var(--text-primary);
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+}
+
+:root[data-theme="light"] .key-form input {
+    background: #fff;
+}
+
+.friend-soon {
+    text-align: center;
+    padding: 2.5rem 1.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+}
+
+.friend-soon p {
+    color: var(--text-secondary);
+    margin-top: 0.75rem;
+}
+
+.spot-chips {
+    margin-bottom: 1.25rem;
+}
+
+.town-chip.is-active {
+    border-color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
+}
+
+.friend-spot {
+    margin-top: -0.3rem;
+}
+
+.field-hint {
+    display: flex;
+    gap: 0.35rem;
+    align-items: flex-start;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.field-hint i {
+    margin-top: 0.1rem;
+    color: var(--accent-orange);
+}

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friends - PoGo Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css?v=10">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <meta name="theme-color" content="#0f172a">
+    <script src="settings.js?v=10"></script>
+    <script src="config.js?v=10"></script>
+</head>
+
+<body>
+    <div class="background-globes">
+        <div class="globe globe-1"></div>
+        <div class="globe globe-2"></div>
+    </div>
+
+    <header class="main-header">
+        <div class="logo-container">
+            <i class="ph-fill ph-calendar-star logo-icon"></i>
+            <h1>PoGo<span class="highlight">Hub</span></h1>
+        </div>
+        <nav>
+            <div id="auth-section"></div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="page-hero">
+            <h2 data-i18n-html="page.friends.title">Friends</h2>
+            <p class="subtitle" data-i18n="page.friends.subtitle"></p>
+        </section>
+
+        <section class="page-body">
+            <div id="friends-view"><div class="loading-state">…</div></div>
+        </section>
+    </main>
+
+    <footer>
+        <p data-i18n="footer">Built for Trainers, by Trainers.</p>
+    </footer>
+
+    <script src="script.js?v=10"></script>
+    <script src="friends.js?v=10"></script>
+</body>
+
+</html>
