@@ -8,10 +8,10 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=4">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <script src="config.js"></script>
+    <script src="config.js?v=4"></script>
     <style>
         .calendar-header {
             margin-top: 2rem;
@@ -94,23 +94,25 @@
         <p>Built for Trainers, by Trainers.</p>
     </footer>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=4"></script>
     <script>
         // Inline script to init calendar view using Supabase auth
+        // (script.js updates the header and fills in the saved events once they're loaded)
         document.addEventListener('DOMContentLoaded', async () => {
-            window.checkAuthStatus(); // Update header (async, but fire-and-forget)
-
-            const { data: { session } } = await window.supabaseClient.auth.getSession();
+            const session = await window.getSession();
 
             if (session) {
                 document.getElementById('calendar-view').style.display = 'block';
                 document.getElementById('login-required').style.display = 'none';
                 const displayName = session.user.email.split('@')[0];
                 document.getElementById('user-welcome').textContent = `Welcome back, ${displayName}!`;
-                window.renderSavedEvents();
             } else {
                 document.getElementById('calendar-view').style.display = 'none';
                 document.getElementById('login-required').style.display = 'block';
+                if (!window.supabaseClient) {
+                    document.querySelector('#login-required p').textContent = "Accounts aren't available yet. Check back soon!";
+                    document.querySelector('#login-required button').textContent = 'Back to events';
+                }
             }
         });
     </script>
