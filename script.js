@@ -491,22 +491,29 @@ function renderWeek(sortedEvents, now) {
             const live = e.start <= now && e.end > now;
             const ended = e.end <= now;
             const status = live ? `<span class="week-live">${window.t('week.live')}</span>` : ended ? `<span class="week-ended">${window.t('week.ended')}</span>` : '';
+            // Each event is its own tile: picture on top, then time, name and type
+            const mons = pokemonWithPictures(e, 2);
+            const icon = eventIcons[e.eventType] || 'ph-calendar-star';
+            const art = mons.length ? mons.map(p => pokemonImg(p)).join('') : `<i class="ph-fill ${icon}"></i>`;
             return `
-                <div class="week-item${ended ? ' is-ended' : ''}" onclick="window.openModal('${escapeHtml(e.eventID)}')">
-                    <span class="week-time">${clockTime(e.start)}</span>
-                    ${avatarHtml(e)}
-                    <div class="week-info">
-                        <span class="week-name">${escapeHtml(e.name)} ${status}</span>
+                <div class="week-tile${ended ? ' is-ended' : ''}" onclick="window.openModal('${escapeHtml(e.eventID)}')" title="${escapeHtml(e.name)}">
+                    <div class="week-tile-art event-card-placeholder placeholder-${escapeHtml(e.eventType)}">${art}</div>
+                    <div class="week-tile-body">
+                        <div class="week-tile-top">
+                            <span class="week-time">${clockTime(e.start)}</span>
+                            ${status}
+                            ${saveButtonHtml(e)}
+                        </div>
+                        <span class="week-name">${escapeHtml(e.name)}</span>
                         <span class="week-type">${escapeHtml(getDef(e.eventType).name)}</span>
                     </div>
-                    ${saveButtonHtml(e)}
                 </div>`;
         }).join('');
 
         return `
             <div class="week-day">
                 <div class="week-day-label">${label} <span>${date}</span></div>
-                ${rows}
+                <div class="week-tiles">${rows}</div>
             </div>`;
     }).join('');
 }
