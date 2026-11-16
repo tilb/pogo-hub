@@ -6,7 +6,7 @@ With Supabase you get accounts, saved events that sync across devices, and the a
 1. Create a free project at supabase.com.
 2. In the project, open **SQL Editor**, paste the contents of `schema.sql` and click **Run**.
 3. Do the same with `seed.sql`. This fills the events table with the starting list.
-   Then run `friend_codes.sql` for the Friends page (friend codes per town).
+   Then run `friend_codes.sql` for the Friends page (friend codes per country).
 4. Open **Project Settings → API** and copy the **Project URL** and the **anon public** key into `config.js`.
    Both are meant to be public; the access rules in `schema.sql` decide who may change what.
 5. Sign up on the site with your own email address.

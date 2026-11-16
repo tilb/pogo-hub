@@ -268,8 +268,13 @@ function avatarHtml(event) {
 
 // --- Supabase: session and saved events ---
 
+// Accounts are only on when Supabase is connected and the accounts feature is switched on in config.js
+function accountsEnabled() {
+    return !!window.supabaseClient && window.siteFeatures?.accounts !== false;
+}
+
 window.getSession = async function () {
-    if (!window.supabaseClient) return null;
+    if (!accountsEnabled()) return null;
     try {
         const { data } = await window.supabaseClient.auth.getSession();
         return data.session;
@@ -311,7 +316,7 @@ async function loadSavedEvents() {
 
 // Events come from our own database; if that isn't set up or reachable, from our own list in data/events.json
 async function fetchEventRows() {
-    if (window.supabaseClient) {
+    if (window.supabaseClient && window.siteFeatures?.eventsFromDatabase !== false) {
         try {
             const { data, error } = await window.supabaseClient.from('events').select('*').order('starts_at');
             if (error) throw error;
@@ -373,6 +378,8 @@ async function applyFilters() {
 }
 
 function saveButtonHtml(event) {
+    // Saving needs an account; without accounts there's nothing to save to
+    if (!accountsEnabled()) return '';
     const isSaved = savedEventIds.has(event.eventID);
     const icon = isSaved ? 'ph-fill ph-star' : 'ph-bold ph-star';
     return `<button class="icon-btn" onclick="event.stopPropagation(); window.toggleSaveEvent('${escapeHtml(event.eventID)}')" title="${window.t(isSaved ? 'card.saved' : 'card.save')}"><i class="${icon}" style="${isSaved ? 'color: var(--accent-primary);' : ''}"></i></button>`;
@@ -902,8 +909,8 @@ window.checkAuthStatus = async function () {
     const authSection = document.getElementById('auth-section');
     if (!authSection) return;
 
-    // Without a Supabase project there are no accounts, so no login button either
-    if (!window.supabaseClient) {
+    // Without accounts (no Supabase project, or switched off in config.js) there's no login button
+    if (!accountsEnabled()) {
         authSection.innerHTML = '';
         return;
     }
@@ -933,7 +940,7 @@ window.checkAuthStatus = async function () {
 // Login Handler (Supabase)
 window.handleLogin = async function (e) {
     if (e) e.preventDefault();
-    if (!window.supabaseClient) return;
+    if (!accountsEnabled()) return;
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
 
@@ -957,7 +964,7 @@ window.handleLogin = async function (e) {
 
 // Sign Up Handler (Supabase)
 window.handleSignUp = async function () {
-    if (!window.supabaseClient) return;
+    if (!accountsEnabled()) return;
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
 

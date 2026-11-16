@@ -1937,19 +1937,19 @@ body {
     }
 }
 
-/* ── Friends (friend codes per town) ──────────────────────────────────── */
+/* ── Friends (friend codes per country) ────────────────────────────────── */
 .friend-hint {
     color: var(--text-secondary);
     margin: 1rem 0;
 }
 
-.town-chips {
+.country-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
 }
 
-.town-chip {
+.country-chip {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -1964,11 +1964,11 @@ body {
     cursor: pointer;
 }
 
-.town-chip:hover {
+.country-chip:hover {
     border-color: var(--accent-primary);
 }
 
-.town-chip span {
+.country-chip span {
     font-size: 0.75rem;
     padding: 0.05rem 0.45rem;
     border-radius: 99px;
@@ -2180,29 +2180,32 @@ body {
     margin-top: 0.75rem;
 }
 
-.spot-chips {
-    margin-bottom: 1.25rem;
-}
-
-.town-chip.is-active {
+.country-chip.is-active {
     border-color: var(--accent-primary);
     background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
 }
 
-.friend-spot {
-    margin-top: -0.3rem;
-}
 
-.field-hint {
+/* Banner shown on friends.html?demo=1 */
+.demo-banner {
     display: flex;
-    gap: 0.35rem;
-    align-items: flex-start;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    line-height: 1.4;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 2rem;
+    border-radius: 14px;
+    border: 1px dashed var(--accent-orange);
+    background: color-mix(in srgb, var(--accent-orange) 12%, transparent);
+    line-height: 1.45;
 }
 
-.field-hint i {
-    margin-top: 0.1rem;
+.demo-banner > i {
+    font-size: 1.4rem;
     color: var(--accent-orange);
+}
+
+.demo-banner > span {
+    flex: 1;
+    min-width: 220px;
 }

@@ -1,12 +1,129 @@
-// Friends page: find Pokémon GO friend codes from players in your town, and list your own.
+// Friends page: find Pokémon GO friend codes from players in your country, and list your own.
 // No account needed: adding a code returns a secret key that this browser keeps, so you can
 // renew or remove the code later. Uses escapeHtml from script.js and t() from settings.js.
 
 const FRIEND_DAYS = 7;            // codes disappear this long after they were added or renewed
-const MY_CODE_KEY = 'pogo_friend_code';
-const TOWN_KEY = 'pogo_town';
+const MY_CODE_KEY = new URLSearchParams(location.search).has('demo') ? 'pogo_friend_code_demo' : 'pogo_friend_code';
+const COUNTRY_KEY = 'pogo_country';
 
-const friendState = { codes: [], loaded: false, error: null, spot: '' };
+// Countries to choose from (ISO two-letter codes). Names come from the browser in the site's language.
+const COUNTRY_CODES = ('AD AE AF AG AI AL AM AO AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BW BY BZ ' +
+    'CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR ' +
+    'GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GT GU GW GY HK HN HR HT HU ID IE IL IM IN IQ IR IS IT JE JM JO JP ' +
+    'KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT ' +
+    'MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW ' +
+    'SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG US ' +
+    'UY UZ VA VC VE VG VI VN VU WF WS XK YE YT ZA ZM ZW').split(' ');
+
+const friendState = { codes: [], loaded: false, error: null };
+
+// ── Demo mode (friends.html?demo=1) ─────────────────────────────────────
+// A stand-in database that lives only in this browser, so the page can be tried
+// before Supabase is connected. It follows the same rules as supabase/friend_codes.sql.
+
+const DEMO_KEY = 'pogo_demo_friend_codes';
+const isDemo = new URLSearchParams(location.search).has('demo');
+
+function demoSeed() {
+    const daysAgo = d => new Date(Date.now() - d * 86400000).toISOString();
+    const row = (code, country, team, age) => ({
+        id: code, code, country, team, created_at: daysAgo(age), secret: 'demo-' + code
+    });
+    return [
+        row('000011112222', 'NL', 'mystic', 1),
+        row('000033334444', 'NL', 'instinct', 3),
+        row('000055556666', 'NL', 'valor', 2),
+        row('000077778888', 'NL', 'mystic', 5),
+        row('000099990000', 'NL', null, 0),
+        row('000012123434', 'BE', 'valor', 4),
+        row('000056567878', 'BE', 'instinct', 6),
+        row('000090901212', 'DE', 'mystic', 2),
+        row('000034345656', 'US', 'instinct', 1),
+        row('000078789090', 'US', 'valor', 3)
+    ];
+}
+
+function demoRows() {
+    let rows = readJson(DEMO_KEY);
+    if (!Array.isArray(rows)) {
+        rows = demoSeed();
+        writeJson(DEMO_KEY, rows);
+    }
+    return rows;
+}
+
+function demoLive(row) {
+    return new Date(row.created_at).getTime() > Date.now() - FRIEND_DAYS * 86400000;
+}
+
+const demoClient = {
+    from() {
+        return {
+            select: () => ({
+                order: () => ({
+                    limit: async () => ({
+                        // Like the real database: only live rows, never the secret
+                        data: demoRows().filter(demoLive)
+                            .sort((a, b) => b.created_at.localeCompare(a.created_at))
+                            .map(({ secret, ...visible }) => visible),
+                        error: null
+                    })
+                })
+            })
+        };
+    },
+    async rpc(name, args) {
+        const rows = demoRows();
+        const fail = message => ({ data: null, error: { message } });
+
+        if (name === 'add_friend_code') {
+            const code = digitsOnly(args.p_code);
+            const country = String(args.p_country || '').trim().toUpperCase();
+            if (!/^\d{12}$/.test(code)) return fail('invalid_code');
+            if (!/^[A-Z]{2}$/.test(country)) return fail('invalid_country');
+
+            const fields = { country, team: args.p_team || null, created_at: new Date().toISOString() };
+            const existing = rows.find(r => r.code === code);
+            if (existing) {
+                if (args.p_secret && args.p_secret === existing.secret) {
+                    Object.assign(existing, fields);
+                    writeJson(DEMO_KEY, rows);
+                    return { data: existing.secret, error: null };
+                }
+                if (demoLive(existing)) return fail('already_listed');
+                rows.splice(rows.indexOf(existing), 1);
+            }
+            const secret = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+            rows.push({ id: code, code, secret, ...fields });
+            writeJson(DEMO_KEY, rows);
+            return { data: secret, error: null };
+        }
+
+        if (name === 'remove_friend_code') {
+            const code = digitsOnly(args.p_code);
+            const index = rows.findIndex(r => r.code === code && r.secret === args.p_secret);
+            if (index < 0) return { data: false, error: null };
+            rows.splice(index, 1);
+            writeJson(DEMO_KEY, rows);
+            return { data: true, error: null };
+        }
+        return fail('unknown_function');
+    }
+};
+
+// The database the Friends page uses: the stand-in in demo mode, otherwise Supabase
+function friendDb() {
+    if (isDemo) return demoClient;
+    return window.siteFeatures?.friendCodes === false ? null : window.supabaseClient;
+}
+
+function resetDemo() {
+    writeJson(DEMO_KEY, null);
+    writeJson(MY_CODE_KEY, null);
+    const page = document.getElementById('friends-view');
+    if (page) page.innerHTML = '';
+    refreshFriends();
+}
 
 function readJson(key) {
     try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
@@ -36,8 +153,43 @@ function formatCode(code) {
     return digitsOnly(code).replace(/(\d{4})(?=\d)/g, '$1 ');
 }
 
-function townKey(town) {
-    return String(town || '').trim().replace(/\s+/g, ' ').toLowerCase();
+function countryName(code) {
+    try {
+        return new Intl.DisplayNames([window.dateLocale()], { type: 'region' }).of(code) || code;
+    } catch {
+        return code;
+    }
+}
+
+// "NL" → 🇳🇱 (some computers, like Windows, show the two letters instead)
+function countryFlag(code) {
+    return /^[A-Z]{2}$/.test(code || '') ? String.fromCodePoint(...[...code].map(ch => 0x1F1A5 + ch.charCodeAt(0))) : '';
+}
+
+function countryLabel(code) {
+    return `${countryFlag(code)} ${countryName(code)}`.trim();
+}
+
+// The country remembered in this browser, otherwise a guess from the browser's language ("nl-NL" → NL)
+function defaultCountry() {
+    const saved = readText(COUNTRY_KEY);
+    if (COUNTRY_CODES.includes(saved)) return saved;
+    for (const lang of navigator.languages || [navigator.language]) {
+        const region = String(lang || '').split('-')[1]?.toUpperCase();
+        if (COUNTRY_CODES.includes(region)) return region;
+    }
+    return '';
+}
+
+// Options for a country dropdown, sorted by name in the site's language
+function countryOptions(selected, counts) {
+    return COUNTRY_CODES
+        .map(code => ({ code, name: countryName(code) }))
+        .sort((a, b) => a.name.localeCompare(b.name, window.dateLocale()))
+        .map(c => {
+            const count = counts?.get(c.code);
+            return `<option value="${c.code}"${c.code === selected ? ' selected' : ''}>${escapeHtml(`${countryFlag(c.code)} ${c.name}`)}${count ? ` (${count})` : ''}</option>`;
+        }).join('');
 }
 
 function daysLeft(createdAt) {
@@ -49,16 +201,15 @@ function friendError(error) {
     const message = String(error?.message || error || '');
     if (message.includes('already_listed')) return window.t('friends.errorTaken');
     if (message.includes('invalid_code')) return window.t('friends.errorCode');
-    if (message.includes('invalid_town')) return window.t('friends.errorTown');
-    if (message.includes('invalid_spot')) return window.t('friends.errorSpot');
+    if (message.includes('invalid_country')) return window.t('friends.errorCountry');
     return window.t('friends.errorGeneral', { message });
 }
 
 async function loadFriendCodes() {
-    if (!window.supabaseClient) return;
-    const { data, error } = await window.supabaseClient
+    if (!friendDb()) return;
+    const { data, error } = await friendDb()
         .from('friend_codes')
-        .select('id, code, town, town_key, spot, spot_key, nickname, team, created_at')
+        .select('id, code, country, team, created_at')
         .order('created_at', { ascending: false })
         .limit(2000);
     friendState.loaded = true;
@@ -68,81 +219,64 @@ async function loadFriendCodes() {
 
 // ── Finding codes ───────────────────────────────────────────────────────
 
-function townsWithCounts() {
-    const towns = new Map();
-    friendState.codes.forEach(c => {
-        const entry = towns.get(c.town_key) || { name: c.town, count: 0 };
-        entry.count++;
-        towns.set(c.town_key, entry);
-    });
-    return [...towns.entries()].sort((a, b) => b[1].count - a[1].count || a[1].name.localeCompare(b[1].name));
+function countryCounts() {
+    const counts = new Map();
+    friendState.codes.forEach(c => counts.set(c.country, (counts.get(c.country) || 0) + 1));
+    return counts;
 }
 
 function codeCard(c) {
     const mine = readJson(MY_CODE_KEY)?.code === c.code;
-    const team = c.team ? `<span class="team-dot team-${escapeHtml(c.team)}" title="${window.t('friends.team.' + c.team)}"></span>` : '';
+    const team = c.team ? `<span class="team-dot team-${escapeHtml(c.team)}"></span>` : '';
     return `
         <div class="friend-card${mine ? ' is-mine' : ''}">
             <div class="friend-top">
                 ${team}
-                <span class="friend-name">${escapeHtml(c.nickname || window.t('friends.anonymous'))}${mine ? ` <span class="friend-you">${window.t('friends.you')}</span>` : ''}</span>
+                <span class="friend-name">${c.team ? window.t('friends.team.' + c.team) : window.t('friends.anonymous')}${mine ? ` <span class="friend-you">${window.t('friends.you')}</span>` : ''}</span>
             </div>
             <button type="button" class="friend-code" data-code="${escapeHtml(c.code)}" title="${window.t('friends.copy')}">
                 <code>${formatCode(c.code)}</code><i class="ph-bold ph-copy"></i>
             </button>
-            <span class="friend-meta"><i class="ph-bold ph-map-pin"></i> ${escapeHtml(c.town)}</span>
-            ${c.spot ? `<span class="friend-meta friend-spot"><i class="ph-bold ph-push-pin"></i> ${escapeHtml(c.spot)}</span>` : ''}
+            <span class="friend-meta">${escapeHtml(countryLabel(c.country))}</span>
         </div>`;
 }
 
 function renderFriendResults() {
     const root = document.getElementById('friend-results');
-    const input = document.getElementById('friend-town');
-    if (!root || !input) return;
+    const select = document.getElementById('friend-country');
+    if (!root || !select) return;
 
-    const query = townKey(input.value);
-    const towns = townsWithCounts();
-    document.getElementById('friend-town-list').innerHTML = towns.map(([, t]) => `<option value="${escapeHtml(t.name)}">`).join('');
+    const counts = countryCounts();
+    const chosen = select.value;
+    select.innerHTML = `<option value="">${window.t('friends.countryPlaceholder')}</option>${countryOptions(chosen, counts)}`;
 
     if (!friendState.codes.length) {
         root.innerHTML = `<p class="subtitle">${window.t('friends.noneYet')}</p>`;
         return;
     }
 
-    if (!query) {
-        root.innerHTML = `
-            <p class="friend-hint">${window.t('friends.pickTown')}</p>
-            <div class="town-chips">${towns.slice(0, 40).map(([key, t]) => `
-                <button type="button" class="town-chip" data-town="${escapeHtml(t.name)}">${escapeHtml(t.name)} <span>${t.count}</span></button>`).join('')}
-            </div>`;
+    // Countries that have codes, most first, so you can jump to them
+    const chips = `
+        <div class="country-chips">${[...counts.entries()]
+            .sort((a, b) => b[1] - a[1] || countryName(a[0]).localeCompare(countryName(b[0])))
+            .slice(0, 40).map(([code, count]) => `
+            <button type="button" class="country-chip${code === chosen ? ' is-active' : ''}" data-country="${code}">${escapeHtml(countryLabel(code))} <span>${count}</span></button>`).join('')}
+        </div>`;
+
+    if (!chosen) {
+        root.innerHTML = `<p class="friend-hint">${window.t('friends.pickCountry')}</p>${chips}`;
         return;
     }
 
-    const matches = friendState.codes.filter(c => c.town_key.includes(query));
-
-    // Favourite play spots in this town, so players in a big city can find people nearby
-    const spots = new Map();
-    matches.forEach(c => {
-        if (!c.spot_key) return;
-        const entry = spots.get(c.spot_key) || { name: c.spot, count: 0 };
-        entry.count++;
-        spots.set(c.spot_key, entry);
-    });
-    if (friendState.spot && !spots.has(friendState.spot)) friendState.spot = '';
-    const shown = friendState.spot ? matches.filter(c => c.spot_key === friendState.spot) : matches;
-    const spotChips = spots.size ? `
-        <div class="town-chips spot-chips">
-            <button type="button" class="town-chip spot-chip${friendState.spot ? '' : ' is-active'}" data-spot=""><i class="ph-bold ph-push-pin"></i> ${window.t('friends.allSpots')}</button>
-            ${[...spots.entries()].sort((a, b) => b[1].count - a[1].count || a[1].name.localeCompare(b[1].name)).map(([key, sp]) => `
-                <button type="button" class="town-chip spot-chip${friendState.spot === key ? ' is-active' : ''}" data-spot="${escapeHtml(key)}">${escapeHtml(sp.name)} <span>${sp.count}</span></button>`).join('')}
-        </div>` : '';
+    const matches = friendState.codes.filter(c => c.country === chosen);
+    const name = escapeHtml(countryName(chosen));
 
     root.innerHTML = matches.length
-        ? `<p class="friend-hint">${window.t(matches.length === 1 ? 'friends.foundOne' : 'friends.found', { count: matches.length, town: escapeHtml(input.value.trim()) })}</p>
-           ${spotChips}
-           <div class="friend-grid">${shown.map(codeCard).join('')}</div>
+        ? `${chips}
+           <p class="friend-hint">${window.t(matches.length === 1 ? 'friends.foundOne' : 'friends.found', { count: matches.length, country: name })}</p>
+           <div class="friend-grid">${matches.map(codeCard).join('')}</div>
            <p class="friend-note"><i class="ph-bold ph-info"></i> ${window.t('friends.howToAdd')}</p>`
-        : `<p class="subtitle">${window.t('friends.noneInTown', { town: escapeHtml(input.value.trim()) })}</p>`;
+        : `${chips}<p class="subtitle">${window.t('friends.noneInCountry', { country: name })}</p>`;
 }
 
 // ── Your own code ───────────────────────────────────────────────────────
@@ -164,7 +298,7 @@ function renderMyCode() {
                 <div>
                     <span class="my-code-label">${window.t('friends.yourCode')}</span>
                     <code class="my-code-value">${formatCode(mine.code)}</code>
-                    <span class="friend-meta"><i class="ph-bold ph-map-pin"></i> ${escapeHtml(listed.town)}${listed.spot ? ` · ${escapeHtml(listed.spot)}` : ''} · ${window.t('friends.expires', { days: daysLeft(listed.created_at) })}</span>
+                    <span class="friend-meta">${escapeHtml(countryLabel(listed.country))} · ${window.t('friends.expires', { days: daysLeft(listed.created_at) })}</span>
                 </div>
                 <div class="my-code-actions">
                     <button type="button" class="nav-btn" id="renew-code"><i class="ph-bold ph-arrow-clockwise"></i> ${window.t('friends.renew')}</button>
@@ -176,7 +310,7 @@ function renderMyCode() {
                     <button type="button" class="friend-code" data-copy="${escapeHtml(mine.secret)}"><code>${escapeHtml(mine.secret)}</code><i class="ph-bold ph-copy"></i></button>
                 </details>
             </div>`;
-        document.getElementById('renew-code').onclick = () => submitCode({ ...mine, town: listed.town, spot: listed.spot, nickname: listed.nickname, team: listed.team }, true);
+        document.getElementById('renew-code').onclick = () => submitCode({ ...mine, country: listed.country, team: listed.team }, true);
         document.getElementById('remove-code').onclick = () => removeCode(mine.code, mine.secret);
         return;
     }
@@ -191,18 +325,11 @@ function renderMyCode() {
                 <input type="text" id="f-code" inputmode="numeric" autocomplete="off" required placeholder="1234 5678 9012" value="${escapeHtml(formatCode(draft.code || ''))}">
             </label>
             <label class="admin-field">
-                <span>${window.t('friends.townLabel')}</span>
-                <input type="text" id="f-town" list="friend-town-list" required maxlength="60" placeholder="${window.t('friends.townPlaceholder')}" value="${escapeHtml(draft.town || readText(TOWN_KEY))}">
-            </label>
-            <label class="admin-field admin-wide">
-                <span>${window.t('friends.spotLabel')}</span>
-                <input type="text" id="f-spot" list="friend-spot-list" maxlength="60" placeholder="${window.t('friends.spotPlaceholder')}" value="${escapeHtml(draft.spot || '')}">
-                <datalist id="friend-spot-list"></datalist>
-                <small class="field-hint"><i class="ph-bold ph-shield-warning"></i> ${window.t('friends.spotHint')}</small>
-            </label>
-            <label class="admin-field">
-                <span>${window.t('friends.nickLabel')}</span>
-                <input type="text" id="f-nick" maxlength="30" placeholder="${window.t('friends.nickPlaceholder')}" value="${escapeHtml(draft.nickname || '')}">
+                <span>${window.t('friends.countryLabel')}</span>
+                <select id="f-country" required>
+                    <option value="">${window.t('friends.countryPlaceholder')}</option>
+                    ${countryOptions(COUNTRY_CODES.includes(draft.country) ? draft.country : defaultCountry())}
+                </select>
             </label>
             <label class="admin-field">
                 <span>${window.t('friends.teamLabel')}</span>
@@ -229,16 +356,6 @@ function renderMyCode() {
         if (pos >= codeInput.value.length) codeInput.setSelectionRange(codeInput.value.length, codeInput.value.length);
     });
 
-    const townField = document.getElementById('f-town');
-    const fillSpotSuggestions = () => {
-        const key = townKey(townField.value);
-        const names = new Map();
-        friendState.codes.filter(c => c.town_key === key && c.spot_key).forEach(c => names.set(c.spot_key, c.spot));
-        document.getElementById('friend-spot-list').innerHTML = [...names.values()].map(n => `<option value="${escapeHtml(n)}">`).join('');
-    };
-    townField.addEventListener('input', fillSpotSuggestions);
-    fillSpotSuggestions();
-
     document.getElementById('code-form').onsubmit = (e) => {
         e.preventDefault();
         const code = digitsOnly(codeInput.value);
@@ -248,9 +365,7 @@ function renderMyCode() {
         }
         submitCode({
             code,
-            town: document.getElementById('f-town').value.trim(),
-            spot: document.getElementById('f-spot').value.trim(),
-            nickname: document.getElementById('f-nick').value.trim(),
+            country: document.getElementById('f-country').value,
             team: document.getElementById('f-team').value,
             secret: mine?.code === code ? mine.secret : null
         }, false);
@@ -262,47 +377,33 @@ function renderMyCode() {
     };
 }
 
-// Use the spelling that's already on the list ("Utrecht" for "utrecht "), otherwise start with a capital
-function tidyTown(town) {
-    const clean = String(town || '').trim().replace(/\s+/g, ' ');
-    const existing = friendState.codes.find(c => c.town_key === clean.toLowerCase());
-    if (existing) return existing.town;
-    return clean === clean.toLowerCase() ? clean.charAt(0).toUpperCase() + clean.slice(1) : clean;
-}
-
-// Same for play spots, within the same town ("Valkhof" for "valkhof")
-function tidySpot(town, spot) {
-    const clean = String(spot || '').trim().replace(/\s+/g, ' ');
-    if (!clean) return '';
-    const existing = friendState.codes.find(c => c.town_key === townKey(town) && c.spot_key === clean.toLowerCase());
-    if (existing) return existing.spot;
-    return clean === clean.toLowerCase() ? clean.charAt(0).toUpperCase() + clean.slice(1) : clean;
-}
-
 async function submitCode(entry, renewing) {
-    const town = tidyTown(entry.town);
-    entry = { ...entry, town, spot: tidySpot(town, entry.spot) };
-    const { data, error } = await window.supabaseClient.rpc('add_friend_code', {
+    if (!entry.country) {
+        alert(window.t('friends.errorCountry'));
+        return;
+    }
+    const { data, error } = await friendDb().rpc('add_friend_code', {
         p_code: entry.code,
-        p_town: entry.town,
-        p_nickname: entry.nickname || null,
+        p_country: entry.country,
         p_team: entry.team || null,
-        p_secret: entry.secret || null,
-        p_spot: entry.spot || null
+        p_secret: entry.secret || null
     });
     if (error) {
         alert(friendError(error));
         return;
     }
-    writeJson(MY_CODE_KEY, { code: entry.code, secret: data, town: entry.town, spot: entry.spot || '', nickname: entry.nickname || '', team: entry.team || '' });
-    writeText(TOWN_KEY, entry.town);
+    writeJson(MY_CODE_KEY, { code: entry.code, secret: data, country: entry.country, team: entry.team || '' });
+    writeText(COUNTRY_KEY, entry.country);
+    // Show the trainers in the country you just listed yourself in
+    const select = document.getElementById('friend-country');
+    if (select) select.value = entry.country;
     await refreshFriends();
     if (renewing) alert(window.t('friends.renewed', { days: FRIEND_DAYS }));
 }
 
 async function removeCode(code, secret) {
     if (!confirm(window.t('friends.confirmRemove', { code: formatCode(code) }))) return;
-    const { data, error } = await window.supabaseClient.rpc('remove_friend_code', { p_code: code, p_secret: secret });
+    const { data, error } = await friendDb().rpc('remove_friend_code', { p_code: code, p_secret: secret });
     if (error) {
         alert(friendError(error));
         return;
@@ -326,7 +427,7 @@ function renderFriendsPage() {
     const page = document.getElementById('friends-view');
     if (!page) return;
 
-    if (!window.supabaseClient) {
+    if (!friendDb()) {
         page.innerHTML = `
             <div class="auth-check-msg friend-soon">
                 <h2><i class="ph-duotone ph-users-three"></i> ${window.t('friends.soonTitle')}</h2>
@@ -334,6 +435,23 @@ function renderFriendsPage() {
             </div>`;
         return;
     }
+    if (isDemo && !document.getElementById('demo-banner')) {
+        const banner = document.createElement('div');
+        banner.id = 'demo-banner';
+        banner.className = 'demo-banner';
+        page.before(banner);
+    }
+    const banner = document.getElementById('demo-banner');
+    if (banner) {
+        banner.innerHTML = `
+            <i class="ph-fill ph-flask"></i>
+            <span><strong>${window.t('friends.demoTitle')}</strong> ${window.t('friends.demoText')}</span>
+            <button type="button" class="nav-btn" id="demo-reset"><i class="ph-bold ph-arrow-counter-clockwise"></i> ${window.t('friends.demoReset')}</button>`;
+        document.getElementById('demo-reset').onclick = () => {
+            if (confirm(window.t('friends.demoResetConfirm'))) resetDemo();
+        };
+    }
+
     if (friendState.error) {
         page.innerHTML = `<p class="subtitle">${window.t('friends.errorGeneral', { message: escapeHtml(friendState.error) })}</p>`;
         return;
@@ -343,10 +461,11 @@ function renderFriendsPage() {
         page.innerHTML = `
             <section class="section-block">
                 <div class="section-header"><h3><i class="ph-fill ph-map-pin"></i> <span>${window.t('friends.findTitle')}</span></h3></div>
-                <div class="search-box mon-search">
-                    <i class="ph-bold ph-magnifying-glass"></i>
-                    <input type="search" id="friend-town" list="friend-town-list" autocomplete="off" placeholder="${window.t('friends.townPlaceholder')}" value="${escapeHtml(readText(TOWN_KEY))}">
-                    <datalist id="friend-town-list"></datalist>
+                <div class="filter-box friend-country-box">
+                    <i class="ph-bold ph-globe-hemisphere-west"></i>
+                    <select id="friend-country" aria-label="${window.t('friends.countryLabel')}">
+                        <option value="${defaultCountry()}" selected></option>
+                    </select>
                 </div>
                 <div id="friend-results"></div>
             </section>
@@ -355,31 +474,22 @@ function renderFriendsPage() {
                 <div id="my-code"></div>
             </section>`;
 
-        const townInput = document.getElementById('friend-town');
-        townInput.addEventListener('input', () => {
-            writeText(TOWN_KEY, townInput.value.trim());
-            friendState.spot = '';
+        const countrySelect = document.getElementById('friend-country');
+        countrySelect.addEventListener('change', () => {
+            writeText(COUNTRY_KEY, countrySelect.value);
             renderFriendResults();
         });
 
     }
 
-    // Copy buttons and town chips (event delegation, wired once so redraws keep working)
+    // Copy buttons and country chips (event delegation, wired once so redraws keep working)
     if (!page.dataset.wired) {
         page.dataset.wired = '1';
         page.addEventListener('click', (e) => {
-            const spotChip = e.target.closest('.spot-chip');
-            if (spotChip) {
-                friendState.spot = spotChip.dataset.spot;
-                renderFriendResults();
-                return;
-            }
-            const chip = e.target.closest('.town-chip');
+            const chip = e.target.closest('.country-chip');
             if (chip) {
-                friendState.spot = '';
-                const townInput = document.getElementById('friend-town');
-                townInput.value = chip.dataset.town;
-                writeText(TOWN_KEY, chip.dataset.town);
+                document.getElementById('friend-country').value = chip.dataset.country;
+                writeText(COUNTRY_KEY, chip.dataset.country);
                 renderFriendResults();
                 return;
             }

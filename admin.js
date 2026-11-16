@@ -185,7 +185,7 @@ async function initAdmin() {
         .map(([key, def]) => `<option value="${escapeHtml(key)}">${escapeHtml(def.name)}</option>`)
         .join('');
 
-    if (!window.supabaseClient) {
+    if (!window.supabaseClient || window.siteFeatures?.accounts === false) {
         showGate('Admin not available yet',
             'This page needs a Supabase project. Follow the steps in <code>supabase/README.md</code> to connect one.');
         return;
