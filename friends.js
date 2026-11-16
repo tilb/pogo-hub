@@ -182,14 +182,12 @@ function defaultCountry() {
 }
 
 // Options for a country dropdown, sorted by name in the site's language
-function countryOptions(selected, counts) {
+function countryOptions(selected) {
     return COUNTRY_CODES
         .map(code => ({ code, name: countryName(code) }))
         .sort((a, b) => a.name.localeCompare(b.name, window.dateLocale()))
-        .map(c => {
-            const count = counts?.get(c.code);
-            return `<option value="${c.code}"${c.code === selected ? ' selected' : ''}>${escapeHtml(`${countryFlag(c.code)} ${c.name}`)}${count ? ` (${count})` : ''}</option>`;
-        }).join('');
+        .map(c => `<option value="${c.code}"${c.code === selected ? ' selected' : ''}>${escapeHtml(`${countryFlag(c.code)} ${c.name}`)}</option>`)
+        .join('');
 }
 
 function daysLeft(createdAt) {
@@ -218,12 +216,8 @@ async function loadFriendCodes() {
 }
 
 // ── Finding codes ───────────────────────────────────────────────────────
-
-function countryCounts() {
-    const counts = new Map();
-    friendState.codes.forEach(c => counts.set(c.country, (counts.get(c.country) || 0) + 1));
-    return counts;
-}
+// Everyone in one list, newest first. Gifts and remote raids work worldwide,
+// so there's no filter; the flag on each card shows where someone plays.
 
 function codeCard(c) {
     const mine = readJson(MY_CODE_KEY)?.code === c.code;
@@ -243,40 +237,14 @@ function codeCard(c) {
 
 function renderFriendResults() {
     const root = document.getElementById('friend-results');
-    const select = document.getElementById('friend-country');
-    if (!root || !select) return;
+    if (!root) return;
 
-    const counts = countryCounts();
-    const chosen = select.value;
-    select.innerHTML = `<option value="">${window.t('friends.countryPlaceholder')}</option>${countryOptions(chosen, counts)}`;
-
-    if (!friendState.codes.length) {
-        root.innerHTML = `<p class="subtitle">${window.t('friends.noneYet')}</p>`;
-        return;
-    }
-
-    // Countries that have codes, most first, so you can jump to them
-    const chips = `
-        <div class="country-chips">${[...counts.entries()]
-            .sort((a, b) => b[1] - a[1] || countryName(a[0]).localeCompare(countryName(b[0])))
-            .slice(0, 40).map(([code, count]) => `
-            <button type="button" class="country-chip${code === chosen ? ' is-active' : ''}" data-country="${code}">${escapeHtml(countryLabel(code))} <span>${count}</span></button>`).join('')}
-        </div>`;
-
-    if (!chosen) {
-        root.innerHTML = `<p class="friend-hint">${window.t('friends.pickCountry')}</p>${chips}`;
-        return;
-    }
-
-    const matches = friendState.codes.filter(c => c.country === chosen);
-    const name = escapeHtml(countryName(chosen));
-
-    root.innerHTML = matches.length
-        ? `${chips}
-           <p class="friend-hint">${window.t(matches.length === 1 ? 'friends.foundOne' : 'friends.found', { count: matches.length, country: name })}</p>
-           <div class="friend-grid">${matches.map(codeCard).join('')}</div>
+    const codes = friendState.codes;
+    root.innerHTML = codes.length
+        ? `<p class="friend-hint">${window.t(codes.length === 1 ? 'friends.foundOne' : 'friends.found', { count: codes.length })}</p>
+           <div class="friend-grid">${codes.map(codeCard).join('')}</div>
            <p class="friend-note"><i class="ph-bold ph-info"></i> ${window.t('friends.howToAdd')}</p>`
-        : `${chips}<p class="subtitle">${window.t('friends.noneInCountry', { country: name })}</p>`;
+        : `<p class="subtitle">${window.t('friends.noneYet')}</p>`;
 }
 
 // ── Your own code ───────────────────────────────────────────────────────
@@ -394,9 +362,6 @@ async function submitCode(entry, renewing) {
     }
     writeJson(MY_CODE_KEY, { code: entry.code, secret: data, country: entry.country, team: entry.team || '' });
     writeText(COUNTRY_KEY, entry.country);
-    // Show the trainers in the country you just listed yourself in
-    const select = document.getElementById('friend-country');
-    if (select) select.value = entry.country;
     await refreshFriends();
     if (renewing) alert(window.t('friends.renewed', { days: FRIEND_DAYS }));
 }
@@ -460,39 +425,19 @@ function renderFriendsPage() {
     if (!document.getElementById('friend-results')) {
         page.innerHTML = `
             <section class="section-block">
-                <div class="section-header"><h3><i class="ph-fill ph-map-pin"></i> <span>${window.t('friends.findTitle')}</span></h3></div>
-                <div class="filter-box friend-country-box">
-                    <i class="ph-bold ph-globe-hemisphere-west"></i>
-                    <select id="friend-country" aria-label="${window.t('friends.countryLabel')}">
-                        <option value="${defaultCountry()}" selected></option>
-                    </select>
-                </div>
+                <div class="section-header"><h3><i class="ph-fill ph-globe-hemisphere-west"></i> <span>${window.t('friends.findTitle')}</span></h3></div>
                 <div id="friend-results"></div>
             </section>
             <section class="section-block">
                 <div class="section-header"><h3><i class="ph-fill ph-identification-card"></i> <span>${window.t('friends.mineTitle')}</span></h3></div>
                 <div id="my-code"></div>
             </section>`;
-
-        const countrySelect = document.getElementById('friend-country');
-        countrySelect.addEventListener('change', () => {
-            writeText(COUNTRY_KEY, countrySelect.value);
-            renderFriendResults();
-        });
-
     }
 
-    // Copy buttons and country chips (event delegation, wired once so redraws keep working)
+    // Copy buttons (event delegation, wired once so redraws keep working)
     if (!page.dataset.wired) {
         page.dataset.wired = '1';
         page.addEventListener('click', (e) => {
-            const chip = e.target.closest('.country-chip');
-            if (chip) {
-                document.getElementById('friend-country').value = chip.dataset.country;
-                writeText(COUNTRY_KEY, chip.dataset.country);
-                renderFriendResults();
-                return;
-            }
             const copy = e.target.closest('[data-code], [data-copy]');
             if (copy) {
                 const text = copy.dataset.code || copy.dataset.copy;

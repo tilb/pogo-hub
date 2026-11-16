@@ -1943,38 +1943,6 @@ body {
     margin: 1rem 0;
 }
 
-.country-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-
-.country-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.9rem;
-    border-radius: 99px;
-    border: 1px solid var(--card-border);
-    background: var(--card-bg);
-    color: var(--text-primary);
-    font-family: var(--font-main);
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.country-chip:hover {
-    border-color: var(--accent-primary);
-}
-
-.country-chip span {
-    font-size: 0.75rem;
-    padding: 0.05rem 0.45rem;
-    border-radius: 99px;
-    background: color-mix(in srgb, var(--accent-primary) 20%, transparent);
-}
-
 .friend-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
@@ -2178,11 +2146,6 @@ body {
 .friend-soon p {
     color: var(--text-secondary);
     margin-top: 0.75rem;
-}
-
-.country-chip.is-active {
-    border-color: var(--accent-primary);
-    background: color-mix(in srgb, var(--accent-primary) 18%, transparent);
 }
 
 
